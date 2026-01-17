@@ -125,8 +125,3 @@ class OmnivoxScheduleParser:
         
         return schedule
 
-if __name__ == "__main__":
-    parser = OmnivoxScheduleParser("Omnivox.pdf")
-    schedule = parser.parseCourses()
-
-    print(schedule)
