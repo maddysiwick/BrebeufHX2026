@@ -56,7 +56,9 @@ def home(request):
         block_lists = [list(day.block_set.all()) for day in days]
         events = generateVisualSchedule(block_lists)
 
-    return render(request, 'home.html', {'events': events,'user':request.user})
+    user_teams = Team.objects.filter(members=request.user)
+
+    return render(request, 'home.html', {'events': events, 'user': request.user, 'teams': user_teams})
 
 def createaccount(request):
     events = []
