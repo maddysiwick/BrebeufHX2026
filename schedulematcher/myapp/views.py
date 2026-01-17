@@ -2,12 +2,8 @@ from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from myapp.models import Block, Day,Schedule,Team,User
 from django.core.files.storage import default_storage
-import os
 import math
-import json
-from datetime import datetime, timedelta
 from .forms import CustomUserCreationForm
 
 from myapp.schedule.scheduler import generateVisualSchedule, pdfToSchedule
@@ -40,7 +36,6 @@ def home(request):
         else:
             messages.success(request, ("Denied"))
             return redirect('welcomepage')
-          
 
     return render(request, 'home.html', {'events': events})
 
@@ -52,7 +47,8 @@ def createaccount(request):
         form = CustomUserCreationForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            user = form.save()
+            login(request, user)
             
             try:
                 pdf = request.FILES['pdfFile']
@@ -75,18 +71,6 @@ def creategroup(request):
 
 def logout_view(request):
     logout(request)
-
-
-def timeToInt(time):
-    hour = int(time.split(":")[0])
-    minute = int(time.split(":")[1])
-    
-    return hour*60 + minute
-
-def intToTime(time):
-    hour = math.floor(time/60)
-    minutes = time % 60
-    return str(hour).zfill(2) + ":" + str(minutes).zfill(2)
 
 
 def dummy(request):

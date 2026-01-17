@@ -1,5 +1,23 @@
 from myapp.schedule.parser import OmnivoxScheduleParser
+from myapp.models import Block, Day,Schedule,Team,User
+from datetime import datetime, timedelta
+import math
 
+# Utility functions
+
+def timeToInt(time):
+    hour = int(time.split(":")[0])
+    minute = int(time.split(":")[1])
+    
+    return hour*60 + minute
+
+def intToTime(time):
+    hour = math.floor(time/60)
+    minutes = time % 60
+    return str(hour).zfill(2) + ":" + str(minutes).zfill(2)
+
+
+# Schedule Stuff
 def generateVisualSchedule(schedule):
     events = []
     weekday_map = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4} 
@@ -89,4 +107,3 @@ def pdfToSchedule(pdf):
                                            day=day))
     
     return [monday, tuesday, wednesday, thursday, friday]
-
