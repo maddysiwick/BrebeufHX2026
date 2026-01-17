@@ -10,3 +10,6 @@ def home(request):
 
 def createaccount(request):
     return render(request, "createaccount.html")
+
+def creategroup(request):
+    return render(request, "creategroupe.html")

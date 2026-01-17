@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% block title %} Home Page {% endblock %} 
+{% block content %}
+
+<h1 style="text-align:center;">Welcome to Schedule Matcher</h1>
+
+<form method="post" action="{% url 'home' %}">
+    {% csrf_token %}
+      
+    <p>Create Group</p>
+        
+    <form action="upload_handler.php" method="post" enctype="multipart/form-data">
+        <label for="pdfFile">Select PDF to upload:</label>
+        <input type="file" name="pdfFile" id="pdfFile" accept=".pdf">
+
+    </form>
+
+
+    <input type="submit" value="Create Account">
+</form>
+
+{% endblock %}
