@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponse, redirect
-from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth import authenticate, login, logout, get_user_model,logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from myapp.models import Block, Day,Schedule,Team,User,Request as TeamRequest
@@ -213,3 +213,6 @@ def toggle_mandatory(request, block_id):
 
     return JsonResponse({"success": True})
 
+def logout_view(request):
+    logout(request)
+    return render(request,"welcomepage.html")
