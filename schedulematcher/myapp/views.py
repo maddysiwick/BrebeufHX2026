@@ -310,9 +310,6 @@ def checkTeamRequests(request):
     requests= request.user.request_set.all()
     print(requests)
 
-def match(request):
-    return render(request, "match.html")
-
 def accept_request(request, request_id):
     if request.method != "POST":
         return redirect("home")
@@ -342,32 +339,6 @@ def reject_request(request, request_id):
         return JsonResponse({"success": True})
     except TeamRequest.DoesNotExist:
         return JsonResponse({"success": False, "error": "Request not found"})
-
-def dummy(request):
-    group2=Team.objects.create(name="french project")
-    group2.members.add(User.objects.get(pk=1))
-    request1=TeamRequest.objects.create(message=f"{request.user.username} invited you to join {group2.name}",receptor=request.user,sender=group2)
-    schedules=[]
-    for member in group2.members.all():
-        schedules.append(member.schedule)
-    results=findVacantPlage(schedules,120)
-    return render (request,"dummy.html",{"vacantPlages":results})
-
-
-
-
-def match(request):
-    schedules = []
-    block_size =30
-    today = datetime.today()
-    monday = today - timedelta(days=today.weekday())
-
-    events = findVacantPlage(schedules, block_size)
-
-    return render(request, "match.html", {"events": events})
-
-
-
 
 @require_POST
 def toggle_mandatory(request, block_id):
