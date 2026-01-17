@@ -11,6 +11,8 @@ from myapp.schedule.scheduler import generateVisualSchedule, pdfToSchedule
 User = get_user_model()
 
 def welcomepage(request):
+    if request.user.is_authenticated:
+        return redirect("home")
     if request.method == "POST":
         pass
     else:
