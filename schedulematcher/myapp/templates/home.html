@@ -4,7 +4,7 @@
 <main class="container-fluid" style="height: 100vh; padding: 15px;">
     <div class="row h-100 no-gutters">
         <!-- Groups Sidebar -->
-        <div class="col-3 h-100" style="padding-right: 15px;">
+        <div class="col-3 h-100 d-none d-md-block" style="padding-right: 15px;">
             <div class="h-100 p-4 border rounded d-flex flex-column">
                 <!-- Empty State -->
                 <div class="d-flex flex-column align-items-center justify-content-center h-100">
@@ -27,6 +27,14 @@
         <div class="col-9 h-100">
             <div class="h-100 p-4 border rounded d-flex flex-column">
                 <p>Groups</p>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation Bar for mobile -->
+        <div class="fixed-bottom bg-white border-top d-md-none" style="height: 75px;">
+            <div class="d-flex align-items-center h-100 px-4" style="gap: 15px;">
+                <button class="btn btn-outline-secondary w-100">Groups</button>
+                <button class="btn btn-outline-secondary w-100">Schedule</button>
             </div>
         </div>
     </div>
