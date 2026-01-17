@@ -58,7 +58,6 @@ def home(request):
     user_teams = Team.objects.filter(members=request.user)
 
     return render(request, 'home.html', {'events': events, 'user': request.user, 'teams': user_teams})
-    return render(request, 'home.html', {'events': events})
 
 def createaccount(request):
     events = []
