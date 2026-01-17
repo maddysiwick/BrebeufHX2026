@@ -9,51 +9,52 @@
             <img src="{% static 'logooo.png' %}" alt="Schedule Matcher" style="height: auto; width: 300px;">
         </div>
 
+
         <form method="post" action="{% url 'createaccount' %}" enctype="multipart/form-data">
             {% csrf_token %}
+            <input type="username" placeholder="Username" name="username" class="form-control mb-3" style="margin-top: 20px" required>
 
-                <form method="post" action="{% url 'createaccount' %}">
-                    {% csrf_token %}
-                    <input type="username" placeholder="Username" name="username" class="form-control mb-3" style="margin-top: 20px" required>
+            <input type="email" placeholder="Email" name="email" class="form-control mb-3" required>
+            
+            <input placeholder="Password" name="password1" type="password" class="form-control mb-3" required>
+            <input placeholder="Confirm Password" name="password2" type="password" class="form-control mb-3" required> <br> <br>
 
-                    <input type="email" placeholder="Email" name="email" class="form-control mb-3" required>
-                    
-                    <input placeholder="Password" name="password1" type="password" class="form-control mb-3" required>
-                    <input placeholder="Confirm Password" name="password2" type="password" class="form-control mb-3" required> <br> <br>
-
-                    <h3 style="text-align:left;">How to insert schedule PDF</h1>
-                    <p>
-                        1. Log into Omnivox <br>
-                        2. Open <em>My Omnivox Services</em> section<br>
-                        3. Click on <em>Obtain my Schedule</em> for the current semester<br>
-                        4. Click on <em>Click here for printer-friendly version</em><br>
-                        5. Click on <em>Compact printable semester schedule</em><br>
-                        6. Click on view<br>
-                        7. Save the PDF to your device<br>
-                        8. Upload the PDF<br>
-                    </p>
-                    <br><br>
-                
-                    <h3>Upload schedule PDF</h3> <br>
-                    <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="choosefilebutton" >
-                    <br><br>
+            <h3 style="text-align:left;">How to insert schedule PDF</h1>
+            <p>
+                1. Log into Omnivox <br>
+                2. Open <em>My Omnivox Services</em> section<br>
+                3. Click on <em>Obtain my Schedule</em> for the current semester<br>
+                4. Click on <em>Click here for printer-friendly version</em><br>
+                5. Click on <em>Compact printable semester schedule</em><br>
+                6. Click on view<br>
+                7. Save the PDF to your device<br>
+                8. Upload the PDF<br>
+            </p>
+            <br><br>
+        
+            <h3>Upload schedule PDF</h3> <br>
+            <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="choosefilebutton" >
+            <br><br>
 
 
-                                        
-                    {% if form.errors %}
-                        <div class="alert alert-danger">
-                            <ul>
-                                {% for field in form %}
-                                    {% if field.errors %}
-                                        {{ field.errors }}
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
+                                
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for field in form %}
+                            {% if field.errors %}
+                                {{ field.errors }}
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
 
 
-                    <input type="submit" id="register" value="Create Account" style="margin-top: 30px;" class="loginbutton">
-                </form>
+            <input type="submit" id="register" value="Create Account" style="margin-top: 30px;" class="loginbutton">
+        </form>
+    </div>
+</main>
+
 
 {% endblock %}

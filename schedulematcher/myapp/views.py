@@ -26,8 +26,6 @@ def welcomepage(request):
 
 def home(request):
     events = []
-    if request.user.is_authenticated:
-        return redirect("home")
     
     if request.method == "POST":
         try:
