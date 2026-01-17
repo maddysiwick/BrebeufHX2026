@@ -12,6 +12,8 @@ from myapp.schedule.scheduler import pdfToSchedule, generateVisualSchedule, find
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from datetime import datetime, timedelta
+from myapp.models import Block, Day,Schedule,Team,User
+
 # Create your views here.
 
 def welcomepage(request):
@@ -97,9 +99,23 @@ def creategroup(request):
             teamInviteRequest = TeamRequest(message="", sender=team, receptor=receptor)
             resolveRequest(teamInviteRequest)
 
+def createCalendarEvent(request):
+    if request.method != "POST":
+        return redirect("home")
+    
+    data = json.loads(request.body.decode(encoding="utf-8", errors="strict"))
+    
+    schedule = request.user.schedule
+    days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday, schedule.saturday, schedule.sunday]
+    day = days[data["day"]]
+    
+    Block.objects.create(name=data["name"], day=day, startTime=data["startTime"], endTime=data["endTime"], mandatory=data.get("mandatory", True))
+    return JsonResponse({"success": True})
+
 
 def logout_view(request):
     logout(request)
+    return redirect("welcomepage")
 
 
 def dummy(request):

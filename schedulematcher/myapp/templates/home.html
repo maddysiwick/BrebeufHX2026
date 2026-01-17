@@ -140,7 +140,7 @@ Added lots of comments to make it easier to find where everything is
         <label>End</label>
         <input id="eventEnd" class="form-control mb-3" type="datetime-local">
 
-        <div class="d-flex justify-content-end gap-2">
+        <div class="d-flex justify-content-end" style="gap: 5px;">
             <button class="btn btn-secondary btn-sm" id="cancelEvent">Cancel</button>
             <button class="btn btn-primary btn-sm" id="saveEvent">Add</button>
         </div>
@@ -280,14 +280,23 @@ Added lots of comments to make it easier to find where everything is
     // Calendar Setup
     // https://github.com/vkurko/calendar
 
-    // Django CSRF helper
-    function getCSRFToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
     
-   const events = JSON.parse(document.getElementById('events-data').textContent);
-
-   
+    const events = JSON.parse(document.getElementById('events-data').textContent);
     let ec = EventCalendar.create(document.getElementById('calendar'), {
         view: 'timeGridWeek',
         height: '100%',
@@ -305,38 +314,81 @@ Added lots of comments to make it easier to find where everything is
         modal.style.display = 'flex';
     });
 
-    document.getElementById('cancelEvent').addEventListener('click', () => {
-    modal.style.display = 'none';
-    });
-
-
-    document.getElementById('saveEvent').addEventListener('click', () => {
-    const title = document.getElementById('eventTitle').value;
-    const start = document.getElementById('eventStart').value;
-    const end = document.getElementById('eventEnd').value;
-
-    if (!title || !start || !end) {
-        alert('Please fill out all fields');
-        return;
+    // Helper function to clear all form fields
+    function clearEventForm() {
+        document.getElementById('eventTitle').value = '';
+        document.getElementById('eventStart').value = '';
+        document.getElementById('eventEnd').value = '';
     }
 
-    ec.addEvent({
-        title: title,
-        start: start,
-        end: end
+    document.getElementById('cancelEvent').addEventListener('click', () => {
+        modal.style.display = 'none';
+        clearEventForm();
     });
 
-    // Close + reset
-    modal.style.display = 'none';
-    document.getElementById('eventTitle').value = '';
-    document.getElementById('eventStart').value = '';
-    document.getElementById('eventEnd').value = '';
+    // Close modal when clicking outside of it
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            clearEventForm();
+        }
     });
 
+    document.getElementById('saveEvent').addEventListener('click', () => {
+        const title = document.getElementById('eventTitle').value;
+        const start = document.getElementById('eventStart').value;
+        const end = document.getElementById('eventEnd').value;
 
-    //EventCalendar.destroy(ec);
+        if (!title || !start || !end) {
+            alert('Please fill out all fields');
+            return;
+        }
 
-    
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        
+        const dayOfWeek = startDate.getDay();
+        const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        
+        const startTime = startDate.getHours() * 60 + startDate.getMinutes();
+        const endTime = endDate.getHours() * 60 + endDate.getMinutes();
+
+        fetch("{% url 'createevent' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+            body: JSON.stringify({
+                name: title,
+                day: dayIndex,
+                startTime: startTime,
+                endTime: endTime,
+                mandatory: false
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                ec.addEvent({
+                    title: title,
+                    start: start,
+                    end: end
+                });
+                
+                modal.style.display = 'none';
+                clearEventForm();
+            } else {
+                alert("Failed to add event");
+            }
+        })
+        .catch(error => {
+            console.error("Error adding event:", error);
+            alert("Failed to add event");
+        });
+    });
+
+    // Dropdown Menu Setup
     const DropdownMenuMapping = {
         "groupSettings": "groupSettingsPopover",
         "notificationsButton": "notificationsPopover"
@@ -381,8 +433,6 @@ Added lots of comments to make it easier to find where everything is
             });
         });
     }
-
-
 
 </script>
 
