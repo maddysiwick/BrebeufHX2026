@@ -39,45 +39,7 @@ def home(request):
         else:
             messages.success(request, ("Denied"))
             return redirect('welcomepage')
-
-        
-           
-
-        # schedule = convert(pdf) # List of 5 lists each containing blocks
-        
-        # weekday_map = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4} 
-        # start_date = datetime(2026, 1, 5)
-
-        # for week in range(4):
-        #     for day_index, day_blocks in enumerate(schedule):
-        #         for block in day_blocks:
-        #             # Get block date
-        #             block_date = start_date + timedelta(days=weekday_map[day_index] + week*7)
-
-        #             # Convert integer times to "HH:MM" string
-        #             start_str = intToTime(block.startTime)
-        #             end_str = intToTime(block.endTime)
-
-        #             # Combine with block date to make ISO datetime
-        #             start_dt = datetime.fromisoformat(f"{block_date.date()}T{start_str}")
-        #             end_dt = datetime.fromisoformat(f"{block_date.date()}T{end_str}")
-
-        #             events.append({
-        #                 'title': block.name,
-        #                 'start': start_dt.isoformat(),
-        #                 'end': end_dt.isoformat(),
-        #                 'color': '#007EA7'
-        #             })
-
-
-        # for i in range(len(schedule)):
-        #     for j in range (len(schedule[i])):
-        #         block = schedule[i][j]
-        #         print(i)
-        #         print(block.name)
-        #         print(block.startTime)
-        #         print(block.endTime)
-                      
+          
 
     return render(request, 'home.html', {'events': events})
 
