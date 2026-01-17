@@ -1,17 +1,59 @@
-{% extends "base.html" %} {% block title %} Home Page {% endblock %} 
+{% extends "base.html" %}
+{% block title %} Home Page {% endblock %}
+
 {% block content %}
 
-<h1 style="text-align:center;">Welcome to Schedule Matcher</h1>
+<main class="container-fluid" style="height: 100vh; padding: 15px;">
+  <div class="row h-100 no-gutters">
 
-<form method="post" action="{% url 'home' %}">
-    {% csrf_token %}
-      
-    <p>Create Group</p>
     
+    <div class="col-3 h-100 d-none d-md-block" style="padding-right: 15px;">
+      <div class="h-100 p-4 border rounded d-flex flex-column" style="gap: 10px;">
+        
+        
+        <div class="d-flex flex-row align-items-center justify-content-start border rounded p-3" style="gap: 10px; background-color: #f5f5f5; position: relative;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon">
+            <path d="M18 21a8 8 0 0 0-16 0"/>
+            <circle cx="10" cy="8" r="5"/>
+            <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/>
+          </svg>
+          <p style="margin-bottom: 0; line-height: 1;">
+            Group <br />
+            <span style="font-size: 12px;" class="text-muted">User 1, User 2, User 3</span>
+          </p>
+          <button style="position: absolute; right: 15px; border: none; background-color: transparent; padding-inline: 0;" id="groupSettings">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis-vertical-icon">
+              <circle cx="12" cy="12" r="1"/>
+              <circle cx="12" cy="5" r="1"/>
+              <circle cx="12" cy="19" r="1"/>
+            </svg>
+          </button>
+        </div>
+
+        
+
+        
+        <a href="{% url 'creategroup' %}" class="btn btn-outline-dark mt-auto w-100 d-flex align-items-center justify-content-center" style="gap: 10px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon">
+            <path d="M5 12h14"/>
+            <path d="M12 5v14"/>
+          </svg>
+          Create Group
+        </a>
+      </div>
+    </div>
+
     
+    <div class="col-9 h-100">
+      <div class="h-100 border rounded d-flex flex-column p-4" style="gap: 20px; overflow-y: auto;">
+        <h5>Enter group-members' emails:</h5>
+        <input type="text" id="email" name="email" class="form-control" placeholder="Email"><br>
 
+        
+      </div>
+    </div>
 
-   
-</form>
+  </div>
+</main>
 
 {% endblock %}
