@@ -101,6 +101,12 @@ def creategroup(request):
             receptor = User.objects.get(username=member)
             teamInviteRequest = TeamRequest(message="", sender=team, receptor=receptor)
             # resolveRequest(teamInviteRequest)
+        
+        return JsonResponse({"success": True, "team_id": team.id})
+    
+    # Get user's teams for sidebar
+    user_teams = Team.objects.filter(members=request.user)
+    return render(request, "creategroup.html", {"teams": user_teams})
 
 def createCalendarEvent(request):
     if request.method != "POST":
@@ -183,9 +189,6 @@ def findScheduleOverlap(blockSize,blocks, earliest=480, latest=1200):
             if clear:
                 candidates[k].append([i,i+blockSize])
     return plage
-
-def creategroup(request):
-    return render(request, "creategroup.html")
 
 def checkTeamRequests(request):
     requests= request.user.request_set.all()

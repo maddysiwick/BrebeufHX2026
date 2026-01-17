@@ -1,52 +1,60 @@
 {% extends "base.html" %}
-{% block title %} Home Page {% endblock %}
+{% block title %} Create Group {% endblock %}
 
 {% block content %}
 
 <main class="container-fluid" style="height: 100vh; padding: 15px;">
   <div class="row h-100 no-gutters">
 
-    
+    <!-- Groups Sidebar -->
     <div class="col-3 h-100 d-none d-md-block" style="padding-right: 15px;">
       <div class="h-100 p-4 border rounded d-flex flex-column" style="gap: 10px;">
         
-        
-        <div class="d-flex flex-row align-items-center justify-content-start border rounded p-3" style="gap: 10px; background-color: #f5f5f5; position: relative;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon">
-            <path d="M18 21a8 8 0 0 0-16 0"/>
-            <circle cx="10" cy="8" r="5"/>
-            <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/>
-          </svg>
-          <p style="margin-bottom: 0; line-height: 1;">
-            Group <br />
-            <span style="font-size: 12px;" class="text-muted">User 1, User 2, User 3</span>
-          </p>
-          <button style="position: absolute; right: 15px; border: none; background-color: transparent; padding-inline: 0;" id="groupSettings">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis-vertical-icon">
-              <circle cx="12" cy="12" r="1"/>
-              <circle cx="12" cy="5" r="1"/>
-              <circle cx="12" cy="19" r="1"/>
-            </svg>
-          </button>
-        </div>
+        {% if teams %}
+          <!-- Render actual groups -->
+          {% for team in teams %}
+          <div class="d-flex flex-row align-items-center justify-content-start border rounded p-3 group-card" 
+               style="gap: 10px; position: relative; cursor: pointer;" 
+               data-team-id="{{ team.id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon lucide-users-round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+            
+            <p style="margin-bottom: 0; line-height: 1;">
+              {{ team.name }} <br />
+              <span style="font-size: 12px;" class="text-muted">
+                {% for member in team.members.all %}{{ member.username }}{% if not forloop.last %}, {% endif %}{% endfor %}
+              </span>
+            </p>
+
+            <button style="position: absolute; right: 15px; border: none; background-color: transparent; padding-inline: 0;" class="groupSettings" data-team-id="{{ team.id }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+          {% endfor %}
+        {% else %}
+          <!-- Empty State -->
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <div class="mb-2 bg-light p-2 rounded">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon lucide-users-round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+            </div>
+
+            <p class="text-center mb-3">
+              No groups yet <br />
+              <span class="text-muted">Create your first group</span>
+            </p>
+          </div>
+        {% endif %}
+
       </div>
     </div>
 
-    
-    <div class="col-9 h-100 d-flex flex-column">
+    <!-- Main Content -->
+    <div class="col-md-9 col-12 h-100 d-flex flex-column" style="background-color: white;">
       <div class="h-100 border rounded d-flex flex-column p-4 justify-content-center px-5" style="gap: 20px; overflow-y: auto;">
         <h5>Enter group-members' usernames:</h5>
         <div class="d-flex flex-row align-items-center justify-content-center" style="gap: 10px;">
           <input type="text" id="email" name="email" class="form-control" placeholder="Username"><br>
           <button type="button" id="addButton" class="addButton">Add</button>
-
         </div>
-
-        {% comment %}
-        <form action="{% url 'creategroup' %}" method="post"> {% csrf_token %}
-          <label for="" id="members"></label>
-        </form>
-        {% endcomment %}
         
         <h5>Invited Members:</h5>
         <div id="emailList" class="h-100 border rounded d-flex flex-column p-4 justify-content-center px-5" style="gap: 20px; overflow-y: auto;">
@@ -154,11 +162,5 @@
       CreateGroup();
     })
     </script>
-    
-      </div>
-    </div>
-
-  </div>
-</main>
 
 {% endblock %}
