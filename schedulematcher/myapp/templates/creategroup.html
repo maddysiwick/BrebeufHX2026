@@ -46,10 +46,11 @@
         <div id="emailList" class="h-100 border rounded d-flex flex-column p-4 justify-content-center px-5" style="gap: 20px; overflow-y: auto;">
           <!-- Empty State-->
         </div>
-        <a href="{% url 'match' %}" id="createGroup"
-        class="btn custom-creategroup mt-auto w-100 d-flex align-items-center justify-content-center"
-        style="gap: 10px;">
-        Create Group
+        <a href="/home/">
+          <button type="submit" class="btn custom-creategroup mt-auto w-100 d-flex align-items-center justify-content-center" style="gap: 10px;" id="createGroup">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              Create Group
+          </button>
         </a>
       </div>
     </div>
@@ -61,12 +62,6 @@
     const emailList = document.getElementById('emailList');
     const addButton = document.getElementById('addButton'); // your add button
     const createGroup = document.getElementById('createGroup');
-    
-
-    createGroup.addEventListener('click', (e) => {
-    //e.preventDefault();   // stop navigation
-    CreateGroup();        // send POST
-    });
 
     const savedEmails = [];
 
@@ -131,25 +126,34 @@
         }
         return cookieValue;
     }
+
+    const groupName = document.getElementById("groupName");
     async function CreateGroup() {
-  if (savedEmails.length <= 0) {
-    return;
-  }
-  
-  const csrftoken = getCookie('csrftoken');
+      if (savedEmails.length <= 0) {
+        return;
+      }
+      
+      const csrftoken = getCookie('csrftoken');
 
-  const response = await fetch("{% url 'creategroup' %}", {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "X-CSRFToken": csrftoken,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(savedEmails)
-  });
+      const response = await fetch("{% url 'creategroup' %}", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "X-CSRFToken": csrftoken,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          emails: savedEmails,
+          groupName: groupName.value
+        })
+      });
 
-  console.log(response.body);
-}
+      console.log(response.body);
+    }
+
+    createGroup.addEventListener("click", () => {
+      CreateGroup();
+    })
 
     </script>
 

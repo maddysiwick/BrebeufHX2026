@@ -362,7 +362,7 @@ def match(request):
     today = datetime.today()
     monday = today - timedelta(days=today.weekday())
 
-    plage, events = findVacantPlage(schedules, block_size, start_date=monday)
+    events = findVacantPlage(schedules, block_size)
 
     return render(request, "match.html", {"events": events})
 
