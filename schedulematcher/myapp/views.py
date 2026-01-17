@@ -4,25 +4,60 @@ from myapp.models import Block, Day,Schedule,Team,User
 from django.core.files.storage import default_storage
 import os
 import math
+import json
+from datetime import datetime, timedelta
 # Create your views here.
 
 def welcomepage(request):
     return render(request, "welcomepage.html")
 
 def home(request):
+    events = []
     if request.method == "POST":
-        pdf = request.FILES['pdfFile']
+        try:
+            pdf = request.FILES['pdfFile']
+        except:
+            print("No pdf")
+            return render(request, 'home.html', {'events': events})
+           
+
         schedule = convert(pdf) # List of 5 lists each containing blocks
-        default_storage.save(pdf.name, pdf)
+        
+        weekday_map = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4} 
+        start_date = datetime(2026, 1, 5)
+
+        for week in range(4):
+            for day_index, day_blocks in enumerate(schedule):
+                for block in day_blocks:
+                    # Get block date
+                    block_date = start_date + timedelta(days=weekday_map[day_index] + week*7)
+
+                    # Convert integer times to "HH:MM" string
+                    start_str = intToTime(block.startTime)
+                    end_str = intToTime(block.endTime)
+
+                    # Combine with block date to make ISO datetime
+                    start_dt = datetime.fromisoformat(f"{block_date.date()}T{start_str}")
+                    end_dt = datetime.fromisoformat(f"{block_date.date()}T{end_str}")
+
+                    events.append({
+                        'title': block.name,
+                        'start': start_dt.isoformat(),
+                        'end': end_dt.isoformat(),
+                        'color': '#007EA7'
+                    })
+
+
         for i in range(len(schedule)):
             for j in range (len(schedule[i])):
                 block = schedule[i][j]
+                print(i)
                 print(block.name)
                 print(block.startTime)
                 print(block.endTime)
                       
 
-    return render(request, 'home.html')
+    return render(request, 'home.html', {'events': events})
 
 def createaccount(request):
     return render(request, "createaccount.html")
@@ -103,17 +138,18 @@ def dummy(request):
     return render (request,"dummy.html",{"vacantPlages":results})
 
 #im sorry for the unholy number of loops
-def findVacantPlage(schedules, blockSize):
+#it's fine it won't grow nearly to the size needed to become slow
+def findVacantPlage(schedules, blockSize, earliest=480, latest=1200):
     blocks=[[],[],[],[],[],[],[]]
     for schedule in schedules:
         days=[schedule.monday,schedule.tuesday,schedule.wednesday,schedule.thursday,schedule.friday,schedule.saturday,schedule.sunday]
         for i in range(len(days)):
             for block in days[i].block_set.all():
                 blocks[i].append((block.startTime,block.endTime))
-    print(blocks)
     plage=[[],[],[],[],[],[],[]]
     candidates=[[],[],[],[],[],[],[]]
-    for i in range(480,1200,15):
+
+    for i in range(earliest,latest,15):
         for k in range(7):
             toRemove=[]
             for pair in candidates[k]:
