@@ -1,6 +1,6 @@
 from django.shortcuts import render, HttpResponse
 from myapp.parser.parser import OmnivoxScheduleParser
-from myapp.models import Block, Day,Schedule
+from myapp.models import Block, Day,Schedule,Team,User
 from django.core.files.storage import default_storage
 import os
 import math
@@ -95,11 +95,12 @@ def intToTime(time):
     return str(hour).zfill(2) + ":" + str(minutes).zfill(2)
 
 def dummy(request):
+    group1=Team.objects.get(pk=1)
     schedules=[]
-    schedules.append(Schedule.objects.get(pk=1))
-    schedules.append(Schedule.objects.get(pk=3))
-    findVacantPlage(schedules,120)
-    return render (request,"dummy.html")
+    for member in group1.members.all():
+        schedules.append(member.schedule)
+    results=findVacantPlage(schedules,120)
+    return render (request,"dummy.html",{"vacantPlages":results})
 
 #im sorry for the unholy number of loops
 def findVacantPlage(schedules, blockSize):
@@ -138,8 +139,7 @@ def findVacantPlage(schedules, blockSize):
                     break
             if clear:
                 candidates[k].append([i,i+blockSize])
-    for day in plage:
-        print(day)
+    return plage
             
 
 

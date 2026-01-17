@@ -21,17 +21,11 @@ class Schedule(models.Model):
     saturday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="saturday")
     sunday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="sunday")
 
+class User(AbstractUser):
+    schedule=models.ForeignKey(Schedule,on_delete=models.CASCADE,null=True)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+class Team(models.Model):
+    members=models.ManyToManyField(User)
+    name=models.CharField(max_length=100)
+    plannedMeetings=models.JSONField(default=list,null=True)
+    meetingSuggestions=models.JSONField(default=dict,null=True)

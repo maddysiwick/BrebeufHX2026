@@ -79,6 +79,9 @@ WSGI_APPLICATION = 'schedulematcher.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
+        "OPTIONS": {
+            "init_command": "PRAGMA synchronous=3; PRAGMA cache_size=2000;",
+        },
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
@@ -126,3 +129,4 @@ MEDIA_ROOT = BASE_DIR / 'uploads'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'myapp.User'
