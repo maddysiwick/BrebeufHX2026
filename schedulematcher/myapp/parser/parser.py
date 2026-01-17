@@ -29,9 +29,8 @@ class Course:
         return f"Course({self.name}, {self.code}, {self.teacher}, {self.startTime}, {self.endTime}, {self.classroom})"
 
 class OmnivoxScheduleParser:
-    def __init__(self, path):
-        self.Path = path
-        self.Reader = PdfReader(path)
+    def __init__(self, pdf):
+        self.Reader = PdfReader(pdf)
 
     def extractScheduleText(self):
         MainPage = self.Reader.pages[0]

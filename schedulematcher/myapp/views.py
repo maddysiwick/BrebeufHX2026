@@ -11,7 +11,8 @@ def welcomepage(request):
 def home(request):
     if request.method == "POST":
         pdf = request.FILES['pdfFile']
-        f = default_storage.save(pdf.name, pdf)
+        schedule = convert(pdf) # List of 5 lists each containing blocks
+        
     return render(request, 'home.html')
 
 def createaccount(request):
@@ -21,9 +22,8 @@ def creategroup(request):
     return render(request, "creategroup.html")
 
 
-def convert():
-    path = os.path.join(os.path.dirname(__file__), 'parser', 'Omnivox.pdf')
-    parse = OmnivoxScheduleParser(path)
+def convert(pdf):
+    parse = OmnivoxScheduleParser(pdf)
     schedule = parse.parseCourses()
 
     monday = []
