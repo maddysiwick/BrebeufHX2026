@@ -83,3 +83,6 @@ def dummy(request):
     return render (request,"dummy.html",{"class":mondayBlocks[0]})
 def creategroup(request):
     return render(request, "creategroup.html")
+
+def match(request):
+    return render(request, "match.html")
