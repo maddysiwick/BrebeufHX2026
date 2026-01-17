@@ -59,6 +59,13 @@ def home(request):
 
     return render(request, 'home.html', {'events': events, 'user': request.user, 'teams': user_teams})
 
+def generateRandomColor():
+    color = "#" + ''.join(random.choices(string.hexdigits, k=6))
+    if color == "#007EA7":
+        return generateRandomColor()
+    
+    return color
+
 # terrible implementation cuz its just regular counter but no time to make it a uuid
 def groupDetail(request, id):
     team = Team.objects.get(id=id)
@@ -69,9 +76,33 @@ def groupDetail(request, id):
     if request.user not in team.members.all():
         return redirect("home")
 
+    events = []
+    if request.user.schedule:
+        schedule = request.user.schedule
+        days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday]
+        block_lists = [list(day.block_set.all()) for day in days]
+        events = generateVisualSchedule(block_lists)
+
     user_teams = Team.objects.filter(members=request.user)
 
-    return render(request, 'groups.html', {'currentTeam': team, 'teams': user_teams})
+    ColorMapping = {}
+    user_events = []
+    for user in team.members.all():
+        if user == request.user:
+            continue
+
+        user_color = generateRandomColor()
+        ColorMapping[user.username] = user_color
+        if user.schedule:
+            schedule = user.schedule
+            days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday]
+            block_lists = [list(day.block_set.all()) for day in days]
+            events = generateVisualSchedule(block_lists, color=user_color)
+            user_events.append(events)
+    
+    all_events = [*user_events, *events]
+
+    return render(request, 'groups.html', {'currentTeam': team, 'teams': user_teams, 'events': all_events, 'ColorMapping': ColorMapping})
 
 def createaccount(request):
     events = []

@@ -18,7 +18,7 @@ def intToTime(time):
 
 
 # Schedule Stuff
-def generateVisualSchedule(schedule):
+def generateVisualSchedule(schedule, color="#007EA7"):
     events = []
     weekday_map = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4} 
     start_date = datetime(2026, 1, 5)
@@ -41,17 +41,8 @@ def generateVisualSchedule(schedule):
                     'title': block.name,
                     'start': start_dt.isoformat(),
                     'end': end_dt.isoformat(),
-                    'color': '#007EA7'
+                    'color': color
                 })
-
-
-    for i in range(len(schedule)):
-        for j in range (len(schedule[i])):
-            block = schedule[i][j]
-            print(i)
-            print(block.name)
-            print(block.startTime)
-            print(block.endTime)
     
     return events
 
