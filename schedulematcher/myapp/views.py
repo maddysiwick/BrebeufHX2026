@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponse
 from myapp.parser.parser import OmnivoxScheduleParser
 from myapp.models import Block, Day,Schedule
-
+import os
 # Create your views here.
 
 def welcomepage(request):
@@ -19,7 +19,8 @@ def creategroup(request):
 
 
 def convert():
-    parse = OmnivoxScheduleParser("/Users/xyc/Desktop/BrebeufHx 2026/Schedule_Matcher/schedulematcher/myapp/parser/Omnivox.pdf")
+    path = os.path.join(os.path.dirname(__file__), 'parser', 'Omnivox.pdf')
+    parse = OmnivoxScheduleParser(path)
     schedule = parse.parseCourses()
 
     monday = []
