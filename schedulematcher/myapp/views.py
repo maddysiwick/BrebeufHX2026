@@ -162,7 +162,7 @@ def creategroup(request):
     
     # Get user's teams for sidebar
     user_teams = Team.objects.filter(members=request.user)
-    return render(request, "creategroup.html", {"teams": user_teams})
+    return render(request, "creategroup.html", {"teams": user_teams, "isGroupCreationPage": True})
 
 def getRequests(request):
     requests = TeamRequest.objects.filter(receptor=request.user)
