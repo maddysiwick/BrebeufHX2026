@@ -9,10 +9,10 @@
             <img src="{% static 'logooo.png' %}" alt="Schedule Matcher" style="height: auto; width: 300px;">
         </div>
 
-        <form method="post" action="{% url 'home' %}" enctype="multipart/form-data">
+        <form method="post" action="{% url 'createaccount' %}" enctype="multipart/form-data">
             {% csrf_token %}
-                <h3 style="text-align:left;">Create an account</h1>
-                <form method="post" action="{% url 'home' %}">
+
+                <form method="post" action="{% url 'createaccount' %}">
                     {% csrf_token %}
                     <input type="username" placeholder="Username" name="username" class="form-control mb-3" style="margin-top: 20px" required>
 
@@ -34,7 +34,7 @@
                     <br><br>
                 
                     <h3>Upload schedule PDF</h3> <br>
-                    <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="choosefilebutton" required>
+                    <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="choosefilebutton" >
                     <br><br>
 
 
