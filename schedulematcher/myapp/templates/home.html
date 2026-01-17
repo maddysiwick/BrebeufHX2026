@@ -19,7 +19,10 @@ Added lots of comments to make it easier to find where everything is
             <div class="h-100 border rounded d-flex flex-column bg-white" style="overflow: hidden;">
                 <!-- Header Section -->
                 <div class="d-flex align-items-center px-4 border-bottom" style="height: 60px; min-height: 60px;">
-                    <h5 class="mb-0">{{user.username}}'s Schedule</h5>
+                    <h5 class="mb-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-check2-icon lucide-calendar-check-2"><path d="M8 2v4"/><path d="M16 2v4"/><path d="M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18"/><path d="m16 20 2 2 4-4"/></svg>
+                        {{user.username}}'s Schedule
+                    </h5>
 
 
                     <div style="position: absolute; right: 15px;">
