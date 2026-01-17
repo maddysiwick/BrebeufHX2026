@@ -31,3 +31,9 @@ class Team(models.Model):
     plannedMeetings=models.JSONField(default=list,null=True)
     meetingSuggestions=models.JSONField(default=dict,null=True)
 
+
+class Request(models.Model):
+    message=models.CharField(max_length=200)
+    receptor=models.ForeignKey(User,on_delete=models.SET_NULL,null=True)
+    sender=models.ForeignKey(Team,on_delete=models.SET_NULL,null=True)
+    

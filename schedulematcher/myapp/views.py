@@ -5,8 +5,8 @@ from django.contrib import messages
 from myapp.models import Block, Day,Schedule,Team,User,Request
 from django.core.files.storage import default_storage
 import math
-import json
-from datetime import datetime, timedelta
+import json 
+import myapp.schedule.scheduler
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 # Create your views here.
@@ -28,40 +28,25 @@ def home(request):
             username = request.POST["username"]
             password = request.POST["password"]
 
-        for week in range(4):
-            for day_index, day_blocks in enumerate(schedule):
-                for block in day_blocks:
-                    # reload block from DB to get correct 'mandatory'
-                    db_block = Block.objects.get(id=block.id)
-
-                    block_date = start_date + timedelta(days=weekday_map[day_index] + week*7)
-
-                    start_str = intToTime(block.startTime)
-                    end_str = intToTime(block.endTime)
-                    start_dt = datetime.fromisoformat(f"{block_date.date()}T{start_str}")
-                    end_dt = datetime.fromisoformat(f"{block_date.date()}T{end_str}")
-
-                    events.append({
-                        'id': db_block.id,  # use db version
-                        'title': db_block.name,
-                        'start': start_dt.isoformat(),
-                        'end': end_dt.isoformat(),
-                        'color': '#007EA7' if db_block.mandatory else '#DFF8FF',
-                        'extendedProps': {
-                            'mandatory': db_block.mandatory
-                        },
-                    })
-
-
-
-        for i in range(len(schedule)):
-            for j in range (len(schedule[i])):
-                block = schedule[i][j]
-                print(i)
-                print(block.name)
-                print(block.startTime)
-                print(block.endTime)
-                      
+        except:
+            return render(request, 'home.html')
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            print("signing in user: "+user.username)
+            login(request, user)
+            return redirect('home')
+        else:
+            print("denied")
+            messages.success(request, ("Denied"))
+            return redirect('welcomepage')
+    
+    
+    if request.user.is_authenticated and request.user.schedule:
+        schedule = request.user.schedule
+        days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday]
+        block_lists = [list(day.block_set.all()) for day in days]
+        events = generateVisualSchedule(block_lists)
 
     return render(request, 'home.html', {'events': events})
 
@@ -97,71 +82,6 @@ def createaccount(request):
 
 def creategroup(request):
     return render(request, "creategroup.html")
-
-
-def convert(pdf):
-    
-    parse = OmnivoxScheduleParser(pdf)
-    schedule = parse.parseCourses()
-
-    monday = []
-    tuesday = []
-    wednesday = []
-    thursday = []
-    friday = []
-
-    for i in range(len(schedule["Monday"])):
-        day = Day.objects.create(name="Monday")
-        monday.append(Block.objects.create(name=schedule["Monday"][i].name, 
-                                           startTime=timeToInt(schedule["Monday"][i].startTime), 
-                                           endTime=timeToInt(schedule["Monday"][i].endTime),
-                                           mandatory=schedule["Monday"][i].mandatory,
-                                           day=day))
-
-    for i in range(len(schedule["Tuesday"])):
-        day = Day.objects.create(name="Tuesday")
-        tuesday.append(Block.objects.create(name=schedule["Tuesday"][i].name, 
-                                            startTime=timeToInt(schedule["Tuesday"][i].startTime), 
-                                            endTime=timeToInt(schedule["Tuesday"][i].endTime),
-                                            mandatory=schedule["Tuesday"][i].mandatory,
-                                            day=day))
-    
-    for i in range(len(schedule["Wednesday"])):
-        day = Day.objects.create(name="Wednesday")
-        wednesday.append(Block.objects.create(name=schedule["Wednesday"][i].name, 
-                                              startTime=timeToInt(schedule["Wednesday"][i].startTime), 
-                                              endTime=timeToInt(schedule["Wednesday"][i].endTime),
-                                              mandatory=schedule["Wednesday"][i].mandatory,
-                                              day=day))
-        
-    for i in range(len(schedule["Thursday"])):
-        day = Day.objects.create(name="Thursday")
-        thursday.append(Block.objects.create(name=schedule["Thursday"][i].name, 
-                                             startTime=timeToInt(schedule["Thursday"][i].startTime), 
-                                             endTime=timeToInt(schedule["Thursday"][i].endTime),
-                                             mandatory=schedule["Thursday"][i].mandatory,
-                                             day=day))
-        
-    for i in range(len(schedule["Friday"])):
-        day = Day.objects.create(name="Friday")
-        friday.append(Block.objects.create(name=schedule["Friday"][i].name, 
-                                           startTime=timeToInt(schedule["Friday"][i].startTime), 
-                                           endTime=timeToInt(schedule["Friday"][i].endTime),
-                                           mandatory=schedule["Friday"][i].mandatory,
-                                           day=day))
-    
-    return [monday, tuesday, wednesday, thursday, friday]
-
-def timeToInt(time):
-    hour = int(time.split(":")[0])
-    minute = int(time.split(":")[1])
-    
-    return hour*60 + minute
-
-def intToTime(time):
-    hour = math.floor(time/60)
-    minutes = time % 60
-    return str(hour).zfill(2) + ":" + str(minutes).zfill(2)
 
 def dummy(request):
     group2=Team.objects.create(name="french project")
