@@ -154,9 +154,11 @@ def creategroup(request):
         team.members.add(request.user)
         
         for member in data["emails"]:
-            receptor = User.objects.get(username=member)
-            teamInviteRequest = TeamRequest(message="", sender=team, receptor=receptor)
-            resolveRequest(teamInviteRequest)
+            try:
+                receptor = User.objects.get(username=member)
+                TeamRequest.objects.create(message=f"{request.user.username} invited you to join {team.name}", sender=team, receptor=receptor)
+            except User.DoesNotExist:
+                continue
         
         return JsonResponse({"success": True, "team_id": team.id})
     
@@ -245,7 +247,7 @@ def logout_view(request):
 def dummy(request):
     group2=Team.objects.create(name="french project")
     group2.members.add(User.objects.get(pk=1))
-    request1=TeamRequest.objects.create(message="you have been invited to join a new group",receptor=request.user,sender=group2)
+    request1=TeamRequest.objects.create(message=f"{request.user.username} invited you to join {group2.name}",receptor=request.user,sender=group2)
     schedules=[]
     for member in group2.members.all():
         schedules.append(member.schedule)
@@ -312,19 +314,40 @@ def checkTeamRequests(request):
 def match(request):
     return render(request, "match.html")
 
-def resolveRequest(teamRequest):
-    team=teamRequest.sender
-    user=teamRequest.receptor
-    team.members.add(user)
+def accept_request(request, request_id):
+    if request.method != "POST":
+        return redirect("home")
     
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Not authenticated"})
+    
+    try:
+        team_request = TeamRequest.objects.get(id=request_id, receptor=request.user)
+        team = team_request.sender
+        team.members.add(request.user)
+        team_request.delete()
+        return JsonResponse({"success": True})
+    except TeamRequest.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Request not found"})
 
-    print(team.members.all())
-    # TeamRequest.objects.delete(teamRequest)
+def reject_request(request, request_id):
+    if request.method != "POST":
+        return redirect("home")
+    
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Not authenticated"})
+    
+    try:
+        team_request = TeamRequest.objects.get(id=request_id, receptor=request.user)
+        team_request.delete()
+        return JsonResponse({"success": True})
+    except TeamRequest.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Request not found"})
 
 def dummy(request):
     group2=Team.objects.create(name="french project")
     group2.members.add(User.objects.get(pk=1))
-    request1=TeamRequest.objects.create(message="you have been invited to join a new group",receptor=request.user,sender=group2)
+    request1=TeamRequest.objects.create(message=f"{request.user.username} invited you to join {group2.name}",receptor=request.user,sender=group2)
     schedules=[]
     for member in group2.members.all():
         schedules.append(member.schedule)

@@ -2,6 +2,15 @@
 <div class="col-3 d-none d-md-block pr-md-3 pr-0" id="groupsSidebar">
     <div class="h-100 p-4 border rounded d-flex flex-column" style="gap: 10px;">
         
+        <!-- Pending Invitations Section -->
+        <div id="pendingInvitationsSection" style="display: none;">
+            <p class="font-weight-bold mb-2">Pending Invitations</p>
+            <div id="invitationsList" class="d-flex flex-column" style="gap: 5px; margin-bottom: 15px;">
+                <!-- Invitations will be injected here -->
+            </div>
+            <hr>
+        </div>
+        
         {% if teams %}
             <!-- Render actual groups -->
             {% for team in teams %}
@@ -48,3 +57,87 @@
         
     </div>
 </div>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function pollRequests() {
+        try {
+            const response = await fetch("{% url 'get-requests' %}");
+            const data = await response.json();
+            renderInvitations(data.requests);
+        } catch (error) {
+            console.error("Error polling requests:", error);
+        }
+    }
+
+    function renderInvitations(requests) {
+        const section = document.getElementById('pendingInvitationsSection');
+        const list = document.getElementById('invitationsList');
+        
+        if (requests.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        list.innerHTML = '';
+
+        requests.forEach(req => {
+            const inviteDiv = document.createElement('div');
+            inviteDiv.className = 'border rounded p-2 bg-light';
+            inviteDiv.style.fontSize = '13px';
+            inviteDiv.innerHTML = `
+                <p class="mb-1">${req.message}</p>
+                <div class="d-flex justify-content-end" style="gap: 5px;">
+                    <button class="btn btn-sm btn-success py-0 px-2" onclick="resolveInvite(${req.id}, 'accept')">Accept</button>
+                    <button class="btn btn-sm btn-danger py-0 px-2" onclick="resolveInvite(${req.id}, 'reject')">Reject</button>
+                </div>
+            `;
+            list.appendChild(inviteDiv);
+        });
+    }
+
+    async function resolveInvite(requestId, action) {
+        const url = action === 'accept' ? `/accept-request/${requestId}/` : `/reject-request/${requestId}/`;
+        const csrftoken = getCookie('csrftoken');
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/json"
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                pollRequests();
+                if (action === 'accept') {
+                    window.location.reload(); // Reload to show the new group
+                }
+            } else {
+                alert("Error: " + (data.error || "Failed to resolve invitation"));
+            }
+        } catch (error) {
+            console.error(`Error ${action}ing request:`, error);
+        }
+    }
+
+    // Initial poll and set interval
+    pollRequests();
+    setInterval(pollRequests, 10000);
+</script>
