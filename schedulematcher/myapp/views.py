@@ -7,3 +7,6 @@ def welcomepage(request):
 
 def home(request):
     return render(request, "home.html")
+
+def home(request):
+    return render(request, "createaccount.html")
