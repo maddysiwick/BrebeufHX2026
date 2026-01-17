@@ -4,6 +4,7 @@
 <h1 style="text-align:center;">Welcome to Schedule Matcher</h1>
 
 <form method="post" action="{% url 'home' %}">
+    
     {% csrf_token %}
         
     <label for="email">Email:</label>
@@ -11,12 +12,16 @@
 
     <label for="password">Password:</label>
     <input type="text" id="password" name="password"><br><br>
-
-    <input type="submit" value="Login">
+    
+    <button type="submit">Login</button>
+   
+    
 </form>
-
+<!--
 <a href="{% url 'createaccount' %}">
     <p>Don't have an account yet? Create one!</p>
 </a>
+-->
+
 
 {% endblock %}
