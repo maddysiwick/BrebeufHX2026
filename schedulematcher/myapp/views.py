@@ -11,11 +11,13 @@ import json
 from myapp.schedule.scheduler import pdfToSchedule, generateVisualSchedule, findVacantPlage
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from datetime import datetime, timedelta
 # Create your views here.
 
 def welcomepage(request):
     if request.user.is_authenticated:
         return redirect("home")
+    
     if request.method == "POST":
         pass
     else:
@@ -43,6 +45,8 @@ def home(request):
             messages.success(request, ("Denied"))
             return redirect('welcomepage')
     
+    if not request.user.is_authenticated:
+        return redirect("welcomepage")
     
     if request.user.is_authenticated and request.user.schedule:
         schedule = request.user.schedule
@@ -73,8 +77,7 @@ def createaccount(request):
             user.schedule = schedule_obj
             user.save()
             
-            events = generateVisualSchedule(block_lists)
-            return render(request, 'home.html', {'events': events})
+            return redirect("home")
         
         
     else:
@@ -172,6 +175,7 @@ def resolveRequest(teamRequest):
     team=teamRequest.sender
     user=teamRequest.receptor
     team.members.add(user)
+    
 
     print(team.members.all())
     # TeamRequest.objects.delete(teamRequest)
@@ -188,16 +192,17 @@ def dummy(request):
 
 
 
-def creategroup(request):
-    if request.method == "POST":
-        print(request)
-        # User.objects.get()
-    
-
-    return render(request, "creategroup.html")
 
 def match(request):
-    return render(request, "match.html")
+    schedules = ...
+    block_size =30
+    today = datetime.today()
+    monday = today - timedelta(days=today.weekday())
+
+    plage, events = findVacantPlage(schedules, block_size, start_date=monday)
+
+    return render(request, "match.html", {"events": events})
+
 
 
 
