@@ -6,7 +6,7 @@ def welcomepage(request):
     return render(request, "welcomepage.html")
 
 def home(request):
-    return render(request, "home.html")
+    return render(request, 'home.html')
 
 def home(request):
     return render(request, "createaccount.html")

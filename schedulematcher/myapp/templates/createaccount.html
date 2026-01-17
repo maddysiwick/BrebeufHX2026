@@ -5,7 +5,10 @@
 
 <form method="post" action="{% url 'home' %}">
     {% csrf_token %}
-        
+      
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username"><br><br>
+
     <label for="email">Email:</label>
     <input type="text" id="email" name="email"><br><br>
 
@@ -13,7 +16,23 @@
     <input type="text" id="password" name="password"><br><br>
 
     <h1 style="text-align:left;">How to insert schedule PDF</h1>
-   
+    <p>
+        1. Log into Omnivox <br>
+        2. Open <em>My Omnivox Services</em> section<br>
+        3. Click on <em>Obtain my Schedule</em> for the current semester<br>
+        4. Click on <em>Click here for printer-friendly version</em><br>
+        5. Click on <em>Compact printable semester schedule</em><br>
+        6. Click on view<br>
+        7. Save the PDF to your device<br>
+        8. Drag and drop the PDF into the upload section<br>
+
+    </p>
+        
+    <form action="upload_handler.php" method="post" enctype="multipart/form-data">
+        <label for="pdfFile">Select PDF to upload:</label>
+        <input type="file" name="pdfFile" id="pdfFile" accept=".pdf">
+
+    </form>
 
 
     <input type="submit" value="Create Account">
