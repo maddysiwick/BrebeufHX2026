@@ -82,7 +82,10 @@ def home(request):
     return render(request, 'home.html', {'events': events})
 
 def createaccount(request):
+    events = []
+
     if request.method == "POST":
+        events = []
         form = CustomUserCreationForm(request.POST)
 
         if form.is_valid():
@@ -192,6 +195,10 @@ def convert(pdf):
     
     return [monday, tuesday, wednesday, thursday, friday]
 
+def logout_view(request):
+    logout(request)
+
+
 def timeToInt(time):
     hour = int(time.split(":")[0])
     minute = int(time.split(":")[1])
@@ -202,6 +209,7 @@ def intToTime(time):
     hour = math.floor(time/60)
     minutes = time % 60
     return str(hour).zfill(2) + ":" + str(minutes).zfill(2)
+
 
 def dummy(request):
     group2=Team.objects.create(name="french project")
