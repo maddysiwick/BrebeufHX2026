@@ -2,9 +2,9 @@
 {% load static %}
 {% block content %}
 
-<main class="container-fluid d-flex justify-content-center align-items-center bg-image">
+<main class="container-fluid d-flex justify-content-center align-items-center bg-image" style="height: 100vh;">
     <!-- Single Centered Box -->
-    <div class="border rounded p-5 shadow" style="width: 600px; background-color: white;">
+    <div class="border rounded p-5 shadow" style="width: 600px; background-color: white; max-height: 700px; overflow-y:auto;">
         <h1 class="mb-4" style="text-align:center;">Create Your Account</h1>
 
         <form method="post" action="{% url 'home' %}" enctype="multipart/form-data">
@@ -12,12 +12,12 @@
 
                 <form method="post" action="{% url 'home' %}">
                     {% csrf_token %}
-                    
+                    <br>
                     <input type="username" placeholder="Username" name="username" class="form-control mb-3" style="margin-top: 50px" required>
 
                     <input type="email" placeholder="Email" name="email" class="form-control mb-3" required>
                     
-                    <input type="password" placeholder="Password" name="password" class="form-control mb-3" required>
+                    <input type="password" placeholder="Password" name="password" class="form-control mb-3" required> <br> <br>
                     
                     <h3 style="text-align:left;">How to insert schedule PDF</h1>
                     <p>
@@ -30,9 +30,11 @@
                         7. Save the PDF to your device<br>
                         8. Upload the PDF<br>
                     </p>
-                    
-                    <h3>Upload schedule PDF</h3>
+                    <br><br>
+                
+                    <h3>Upload schedule PDF</h3> <br>
                     <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="choosefilebutton" required>
+                    <br><br>
 
 
                     <input type="submit" id="register" value="Create Account" style="margin-top: 30px;" class="loginbutton">
