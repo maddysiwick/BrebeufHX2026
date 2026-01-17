@@ -24,19 +24,21 @@ def welcomepage(request):
 def home(request):
     events = []
     if request.method == "POST":
-      
+        print("made it into block")
         try:
-            email = request.POST["email"]
+            username = request.POST["username"]
             password = request.POST["password"]
 
         except:
             return render(request, 'home.html')
         
-        user = authenticate(request, email=email, password=password)
+        user = authenticate(request, username=username, password=password)
         if user is not None:
+            print("signing in user: "+user.username)
             login(request, user)
             return redirect('home')
         else:
+            print("denied")
             messages.success(request, ("Denied"))
             return redirect('welcomepage')
 
