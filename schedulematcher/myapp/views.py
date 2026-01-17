@@ -43,7 +43,6 @@ def home(request):
             return redirect('home')
         else:
             print("denied")
-            messages.success(request, ("Denied"))
             return redirect('welcomepage')
 
     if not request.user.is_authenticated:
