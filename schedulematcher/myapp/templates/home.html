@@ -13,7 +13,7 @@ Added lots of comments to make it easier to find where everything is
 <main class="container-fluid" style="height: 100vh; padding: 15px;">
     <div class="row h-100 no-gutters">
         <!-- Groups Sidebar -->
-        <div class="col-3 h-100 d-none d-md-block" style="padding-right: 15px;">
+        <div class="col-3 d-none d-md-block pr-md-3 pr-0" id="groupsSidebar">
             <div class="h-100 p-4 border rounded d-flex flex-column" style="gap: 10px;">
                 {% comment %}
                 <!-- This is for Empty State (aka when there is no groups found in db) -->
@@ -69,8 +69,8 @@ Added lots of comments to make it easier to find where everything is
         </div>
 
         <!-- Main Content -->
-        <div class="col-9 h-100">
-            <div class="h-100 border rounded d-flex flex-column" style="overflow: hidden;">
+        <div class="col-md-9 col-12" id="mainContent">
+            <div class="h-100 border rounded d-flex flex-column bg-white" style="overflow: hidden;">
                 <!-- Header Section -->
                 <div class="d-flex align-items-center px-4 border-bottom" style="height: 60px; min-height: 60px;">
                     <h5 class="mb-0">Schedule Matcher</h5>
@@ -107,8 +107,8 @@ Added lots of comments to make it easier to find where everything is
         <!-- Bottom Navigation Bar for mobile (unfinished) -->
         <div class="fixed-bottom bg-white border-top d-md-none" style="height: 75px;">
             <div class="d-flex align-items-center h-100 px-4" style="gap: 15px;">
-                <button class="btn btn-outline-secondary w-100">Groups</button>
-                <button class="btn btn-outline-secondary w-100">Schedule</button>
+                <button class="btn btn-outline-secondary w-100" id="groupsButton">Groups</button>
+                <button class="btn btn-outline-secondary w-100" id="scheduleButton">Schedule</button>
             </div>
         </div>
         
@@ -117,6 +117,105 @@ Added lots of comments to make it easier to find where everything is
 
 
 <script>
+    // Setup Mobile View
+    const urlParams = new URLSearchParams(window.location.search);
+    let MobileViewState = urlParams.get('page') || "schedule";
+
+    const groupsSidebar = document.getElementById("groupsSidebar");
+    const mainContent = document.getElementById("mainContent");
+
+    const groupsButton = document.getElementById("groupsButton");
+    const scheduleButton = document.getElementById("scheduleButton");
+    
+    // Helper
+    function isMobile() {
+        return window.innerWidth < 768;
+    }
+
+    function setMobileView() {
+        if (isMobile()) {
+            mainContent.style.height = "calc(100% - 75px)";
+            groupsSidebar.style.height = "calc(100% - 75px)";
+        } else {
+            mainContent.style.height = "100%";
+            groupsSidebar.style.height = "100%";
+        }
+    }
+
+    function updateURL(page) {
+        const url = new URL(window.location);
+        url.searchParams.set('page', page);
+        history.replaceState({}, '', url);
+    }
+
+    // Main Functions
+    function showGroups() {
+        if (!isMobile()) {
+            return;
+        }
+        MobileViewState = "groups";
+        updateURL("groups");
+        setMobileView();
+        
+        groupsSidebar.classList.remove('d-none');
+        mainContent.classList.add('d-none');
+        
+        groupsSidebar.classList.add('col-12');
+        groupsSidebar.classList.remove('col-3');
+
+        groupsButton.classList.add('active');
+        scheduleButton.classList.remove('active');
+    }
+
+    function showSchedule() {
+        if (!isMobile()) {
+            return;
+        }
+        MobileViewState = "schedule";
+        updateURL("schedule");
+        setMobileView();
+
+        groupsSidebar.classList.add('d-none');
+        mainContent.classList.remove('d-none');
+
+        groupsSidebar.classList.add('col-3');
+        groupsSidebar.classList.remove('col-12');
+
+        groupsButton.classList.remove('active');
+        scheduleButton.classList.add('active');
+    }
+
+    // Main
+    function HandleView() {
+        setMobileView();
+        
+        if (!isMobile()) {
+            groupsSidebar.classList.remove('d-none');
+            mainContent.classList.remove('d-none');
+
+            groupsSidebar.classList.add('col-3');
+            groupsSidebar.classList.remove('col-12');
+            
+            groupsSidebar.classList.remove('bg-white');
+        } else {
+            groupsSidebar.classList.add('bg-white');
+            
+            if (MobileViewState == "groups") {
+                showGroups();
+            } else {
+                showSchedule();
+            }
+        }
+    }
+    
+    // Event Listeners
+    groupsButton.addEventListener("click", showGroups);
+    scheduleButton.addEventListener("click", showSchedule);
+    window.addEventListener('resize', HandleView);
+
+    // Initial View
+    HandleView();
+
     // Calendar Setup
     // https://github.com/vkurko/calendar
     
