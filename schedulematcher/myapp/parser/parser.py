@@ -21,6 +21,9 @@ class Course:
         self.startTime = start_time
         self.endTime = end_time
         self.classroom = classroom
+
+    def __getitem__(self, key):
+        return getattr(self, key)
     
     def __repr__(self):
         return f"Course({self.name}, {self.code}, {self.teacher}, {self.startTime}, {self.endTime}, {self.classroom})"
@@ -35,7 +38,7 @@ class OmnivoxScheduleParser:
         scheduleText = MainPage.extract_text()
         return scheduleText
 
-    def parseCourses(self):
+    def parseCourses(self, asRaw=False):
         """
         Parse the PDF and return course data organized by day.
         
@@ -104,12 +107,22 @@ class OmnivoxScheduleParser:
                     
                 dayFull = DAY_MAP.get(dayAbbrev, dayAbbrev)
                 
-                schedule[dayFull].append(Course(courseName, courseCode, teacher, startTime, endTime, classroom))
+                if asRaw:
+                    schedule[dayFull].append({
+                        "name": courseName,
+                        "code": courseCode,
+                        "teacher": teacher,
+                        "startTime": startTime,
+                        "endTime": endTime,
+                        "classroom": classroom
+                    })
+                else:
+                    schedule[dayFull].append(Course(courseName, courseCode, teacher, startTime, endTime, classroom))
 
                 i += 1
     
         for day in schedule:
-            schedule[day].sort(key=lambda x: x.startTime)
+            schedule[day].sort(key=lambda x: x["startTime"] if asRaw else x.startTime)
         
         return schedule
 
