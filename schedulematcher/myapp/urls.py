@@ -13,6 +13,7 @@ urlpatterns = [
     path("login/", include("django.contrib.auth.urls")),
     path("creategroup/", views.creategroup, name="creategroup"),
     path("createevent/", views.createCalendarEvent, name="createevent"),
+    path("get-requests/", views.getRequests, name="get-requests"),
     path("match/", views.match, name="match"),
     path('toggle-mandatory/<int:block_id>/', toggle_mandatory, name='toggle_mandatory'),
     path('logout/', views.logout_view, name='logout'),

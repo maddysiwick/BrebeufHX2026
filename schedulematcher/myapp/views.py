@@ -108,6 +108,10 @@ def creategroup(request):
     user_teams = Team.objects.filter(members=request.user)
     return render(request, "creategroup.html", {"teams": user_teams})
 
+def getRequests(request):
+    requests = TeamRequest.objects.filter(receptor=request.user)
+    return JsonResponse({"requests": list(requests.values())})
+
 def createCalendarEvent(request):
     if request.method != "POST":
         return redirect("home")
