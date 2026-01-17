@@ -2,25 +2,6 @@
 {% load static %}
 {% block content %}
 
-<!-- <script>
-    (function() {
-    $('form > input').keyup(function() {
-
-        var empty = false;
-        $('form > input').each(function() {
-            if ($(this).val() == '') {
-                empty = true;
-            }
-        });
-
-        if (empty) {
-            $('#register').attr('disabled', 'disabled');
-        } else {
-            $('#register').removeAttr('disabled'); 
-        }
-    });
-})()
-</script> -->
 <main class="container-fluid d-flex justify-content-center align-items-center bg-image">
     <!-- Single Centered Box -->
     <div class="border rounded p-5 shadow" style="width: 600px; background-color: white;">
@@ -32,11 +13,11 @@
                 <form method="post" action="{% url 'home' %}">
                     {% csrf_token %}
                     
-                    <input type="username" placeholder="Username" name="username" class="form-control mb-3" style="margin-top: 50px">
+                    <input type="username" placeholder="Username" name="username" class="form-control mb-3" style="margin-top: 50px" required>
 
-                    <input type="email" placeholder="Email" name="email" class="form-control mb-3">
+                    <input type="email" placeholder="Email" name="email" class="form-control mb-3" required>
                     
-                    <input type="password" placeholder="Password" name="password" class="form-control mb-3">
+                    <input type="password" placeholder="Password" name="password" class="form-control mb-3" required>
                     
                     <h3 style="text-align:left;">How to insert schedule PDF</h1>
                     <p>
@@ -49,9 +30,9 @@
                         7. Save the PDF to your device<br>
                         8. Drag and drop the PDF into the upload section<br>
                     </p>
-                        
+                    
                     <h3>Upload schedule PDF</h3>
-                    <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="choosefilebutton">
+                    <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="choosefilebutton" required>
 
 
                     <input type="submit" id="register" value="Create Account" style="margin-top: 30px;" class="loginbutton">
