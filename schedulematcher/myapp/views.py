@@ -41,7 +41,7 @@ def home(request):
             messages.success(request, ("Denied"))
             return redirect('welcomepage')
 
-    return render(request, 'home.html', {'events': events})
+    return render(request, 'home.html', {'events': events,'user':request.user})
 
 def createaccount(request):
     events = []
