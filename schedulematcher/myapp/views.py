@@ -109,7 +109,6 @@ def findVacantPlage(schedules, blockSize):
         for i in range(len(days)):
             for block in days[i].block_set.all():
                 blocks[i].append((block.startTime,block.endTime))
-    print(blocks)
     plage=[[],[],[],[],[],[],[]]
     candidates=[[],[],[],[],[],[],[]]
     for i in range(480,1200,15):
@@ -138,8 +137,7 @@ def findVacantPlage(schedules, blockSize):
                     break
             if clear:
                 candidates[k].append([i,i+blockSize])
-    for day in plage:
-        print(day)
+    return plage
             
 
 

@@ -1,10 +1,11 @@
 {% extends "base.html" %} {% block title %} Home Page {% endblock %} 
+{% load static %}
 {% block content %}
 
 
-<main class="container-fluid d-flex justify-content-center align-items-center" style="height: 100vh; padding: 15px;">
+<main class="container-fluid d-flex justify-content-center align-items-center bg-image">
     <!-- Single Centered Box -->
-    <div class="border rounded p-5 shadow" style="max-width: 1500px; width: 100%; background-color: white;">
+    <div class="border rounded p-5 shadow" style="width: 600px; background-color: white;">
         <h1 class="mb-4" style="text-align:center;">Create Your Account</h1>
 
         <form method="post" action="{% url 'home' %}" enctype="multipart/form-data">
@@ -13,16 +14,13 @@
                 <form method="post" action="{% url 'home' %}">
                     {% csrf_token %}
                     
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username"><br><br>
+                    <input type="username" placeholder="Username" name="username" class="form-control mb-3" style="margin-top: 50px">
 
-                    <label for="email">Email:</label>
-                    <input type="text" id="email" name="email"><br><br>
-
-                    <label for="password">Password:</label>
-                    <input type="text" id="password" name="password"><br><br>
-
-                    <h1 style="text-align:left;">How to insert schedule PDF</h1>
+                    <input type="email" placeholder="Email" name="email" class="form-control mb-3">
+                    
+                    <input type="password" placeholder="Password" name="password" class="form-control mb-3">
+                    
+                    <h3 style="text-align:left;">How to insert schedule PDF</h1>
                     <p>
                         1. Log into Omnivox <br>
                         2. Open <em>My Omnivox Services</em> section<br>
@@ -34,11 +32,11 @@
                         8. Drag and drop the PDF into the upload section<br>
                     </p>
                         
-                    <h2>Upload schedule PDF</h2>
-                    <input type="file" name="pdfFile" id="pdfFile" accept=".pdf"><br><br>
+                    <h3>Upload schedule PDF</h3>
+                    <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="choosefilebutton">
 
 
-                    <input type="submit" value="Create Account">
+                    <input type="submit" value="Create Account" style="margin-top: 30px;" class="loginbutton">
                 </form>
 
 {% endblock %}
