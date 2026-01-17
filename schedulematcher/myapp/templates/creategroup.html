@@ -29,27 +29,73 @@
             </svg>
           </button>
         </div>
-
-        
-
-        
-        <a href="{% url 'creategroup' %}" class="btn btn-outline-dark mt-auto w-100 d-flex align-items-center justify-content-center" style="gap: 10px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon">
-            <path d="M5 12h14"/>
-            <path d="M12 5v14"/>
-          </svg>
-          Create Group
-        </a>
       </div>
     </div>
 
     
-    <div class="col-9 h-100">
-      <div class="h-100 border rounded d-flex flex-column p-4" style="gap: 20px; overflow-y: auto;">
+    <div class="col-9 h-100 d-flex flex-column">
+      <div class="h-100 border rounded d-flex flex-column p-4 justify-content-center px-5" style="gap: 20px; overflow-y: auto;">
         <h5>Enter group-members' emails:</h5>
-        <input type="text" id="email" name="email" class="form-control" placeholder="Email"><br>
+        <div class="d-flex flex-row align-items-center justify-content-center" style="gap: 10px;">
+          <input type="text" id="email" name="email" class="form-control" placeholder="Email"><br>
+          <button class="btn btn-primary">Add</button>
+        </div>
 
-        
+        <h5>Invited Members:</h5>
+        <div id="emailList" class="h-100 border rounded d-flex flex-column p-4 justify-content-center px-5" style="gap: 20px; overflow-y: auto;">
+          <!-- Empty State-->
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  const emailInput = document.getElementById('email');
+  const emailList = document.getElementById('emailList');
+
+  emailInput.addEventListener('keypress', function(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault(); 
+    const email = emailInput.value.trim();
+    if (email) {
+    
+    const emailTag = document.createElement('div');
+    emailTag.className = 'd-flex align-items-center border rounded px-2 py-1 bg-light';
+    emailTag.style.gap = '5px';
+
+    
+    const emailText = document.createElement('span');
+    emailText.textContent = email;
+
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = '×'; // This is the X
+    removeBtn.className = 'btn btn-sm btn-light';
+    removeBtn.style.padding = '0 5px';
+    removeBtn.style.border = 'none';
+    removeBtn.style.background = 'transparent';
+    removeBtn.style.cursor = 'pointer';
+
+    
+    removeBtn.addEventListener('click', () => {
+      emailList.removeChild(emailTag);
+    });
+
+    
+    emailTag.appendChild(emailText);
+    emailTag.appendChild(removeBtn);
+
+     
+    emailList.appendChild(emailTag);
+
+    
+    emailInput.value = '';
+    }
+  }
+  });
+</script>
       </div>
     </div>
 

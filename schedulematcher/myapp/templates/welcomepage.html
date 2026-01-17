@@ -1,25 +1,31 @@
 {% extends "base.html" %} {% block title %} Home Page {% endblock %} 
 {% block content %}
 
-<h1 style="text-align:center;">Welcome to Schedule Matcher</h1>
 
-<form method="post" action="{% url 'home' %}">
-    
-    {% csrf_token %}
-        
-    <label for="email">Email:</label>
-    <input type="text" id="email" name="email"><br><br>
+<main class="container-fluid d-flex justify-content-center align-items-center" style="height: 100vh; padding: 15px;">
+    <!-- Single Centered Box -->
+    <div class="border rounded p-5 shadow" style="max-width: 1500px; width: 100%; background-color: white;">
+        <h1 class="mb-4" style="text-align:center;">Create Your Account</h1>
 
-    <label for="password">Password:</label>
-    <input type="text" id="password" name="password"><br><br>
-    
-    <button type="submit">Login</button>
+        <h1 style="text-align:center;">Welcome to Schedule Matcher</h1>
 
-</form>
+        <form method="post" action="{% url 'home' %}">
+            
+            {% csrf_token %}
+                
+            <label for="email">Email:</label>
+            <input type="text" id="email" name="email"><br><br>
 
-<a href="{% url 'createaccount' %}">
-    <p>Don't have an account yet? Create one!</p>
-</a>
+            <label for="password">Password:</label>
+            <input type="text" id="password" name="password"><br><br>
+            
+            <button type="submit">Login</button>
+
+        </form>
+
+        <a href="{% url 'createaccount' %}">
+            <p>Don't have an account yet? Create one!</p>
+        </a>
 
 
 

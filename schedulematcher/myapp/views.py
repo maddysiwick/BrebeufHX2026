@@ -1,25 +1,38 @@
 from django.shortcuts import render, HttpResponse
 from myapp.parser.parser import OmnivoxScheduleParser
 from myapp.models import Block, Day,Schedule
-
+from django.core.files.storage import default_storage
+import os
+import math
 # Create your views here.
 
 def welcomepage(request):
     return render(request, "welcomepage.html")
 
 def home(request):
-    print(convert())
+    if request.method == "POST":
+        pdf = request.FILES['pdfFile']
+        schedule = convert(pdf) # List of 5 lists each containing blocks
+        default_storage.save(pdf.name, pdf)
+        for i in range(len(schedule)):
+            for j in range (len(schedule[i])):
+                block = schedule[i][j]
+                print(block.name)
+                print(block.startTime)
+                print(block.endTime)
+                      
+
     return render(request, 'home.html')
 
 def createaccount(request):
     return render(request, "createaccount.html")
 
 def creategroup(request):
-    return render(request, "creategroupe.html")
+    return render(request, "creategroup.html")
 
 
-def convert():
-    parse = OmnivoxScheduleParser("/Users/xyc/Desktop/BrebeufHx 2026/Schedule_Matcher/schedulematcher/myapp/parser/Omnivox.pdf")
+def convert(pdf):
+    parse = OmnivoxScheduleParser(pdf)
     schedule = parse.parseCourses()
 
     monday = []
@@ -75,7 +88,12 @@ def timeToInt(time):
     minute = int(time.split(":")[1])
     
     return hour*60 + minute
-    
+
+def intToTime(time):
+    hour = math.floor(time/60)
+    minutes = time % 60
+    return str(hour).zfill(2) + ":" + str(minutes).zfill(2)
+
 def dummy(request):
     schedules=[]
     schedules.append(Schedule.objects.get(pk=1))
@@ -124,3 +142,9 @@ def findVacantPlage(schedules, blockSize):
         print(day)
             
 
+
+def creategroup(request):
+    return render(request, "creategroup.html")
+
+def match(request):
+    return render(request, "match.html")

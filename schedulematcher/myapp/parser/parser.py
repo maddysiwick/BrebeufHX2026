@@ -13,7 +13,7 @@ DAY_MAP = {
     "Fri": "Friday"
 }
 
-class ScheduleItem:
+class Course:
     def __init__(self, name, code, teacher, start_time, end_time, classroom):
         self.name = name
         self.code = code
@@ -21,28 +21,30 @@ class ScheduleItem:
         self.startTime = start_time
         self.endTime = end_time
         self.classroom = classroom
+
+    def __getitem__(self, key):
+        return getattr(self, key)
     
     def __repr__(self):
-        return f"ScheduleItem({self.name}, {self.code}, {self.teacher}, {self.startTime}, {self.endTime}, {self.classroom})"
+        return f"Course({self.name}, {self.code}, {self.teacher}, {self.startTime}, {self.endTime}, {self.classroom})"
 
 class OmnivoxScheduleParser:
-    def __init__(self, path):
-        self.Path = path
-        self.Reader = PdfReader(path)
+    def __init__(self, pdf):
+        self.Reader = PdfReader(pdf)
 
     def extractScheduleText(self):
         MainPage = self.Reader.pages[0]
         scheduleText = MainPage.extract_text()
         return scheduleText
 
-    def parseCourses(self):
+    def parseCourses(self, asRaw=False):
         """
         Parse the PDF and return course data organized by day.
         
         Returns:
             {
                 "Monday": [
-                    ScheduleItem()
+                    Course()
                 ],
                 "Tuesday": [...],
                 ...
@@ -104,12 +106,22 @@ class OmnivoxScheduleParser:
                     
                 dayFull = DAY_MAP.get(dayAbbrev, dayAbbrev)
                 
-                schedule[dayFull].append(ScheduleItem(courseName, courseCode, teacher, startTime, endTime, classroom))
+                if asRaw:
+                    schedule[dayFull].append({
+                        "name": courseName,
+                        "code": courseCode,
+                        "teacher": teacher,
+                        "startTime": startTime,
+                        "endTime": endTime,
+                        "classroom": classroom
+                    })
+                else:
+                    schedule[dayFull].append(Course(courseName, courseCode, teacher, startTime, endTime, classroom))
 
                 i += 1
     
         for day in schedule:
-            schedule[day].sort(key=lambda x: x.startTime)
+            schedule[day].sort(key=lambda x: x["startTime"] if asRaw else x.startTime)
         
         return schedule
 
