@@ -1,6 +1,6 @@
 from django.shortcuts import render, HttpResponse
 from myapp.parser.parser import OmnivoxScheduleParser
-from myapp.models import Block, Day
+from myapp.models import Block, Day,Schedule
 
 # Create your views here.
 
@@ -14,16 +14,7 @@ def home(request):
 def createaccount(request):
     return render(request, "createaccount.html")
 
-<<<<<<< HEAD
-def dummy(request):
-    schedule=Schedule.objects.get(pk=1)
-    mondayBlocks=schedule.monday.block_set.all()
-    return render (request,"dummy.html",{"class":mondayBlocks[1]})
-
 def creategroup(request):
-    return render(request, "creategroup.html")
-=======
-def creategroupe(request):
     return render(request, "creategroupe.html")
 
 
@@ -85,4 +76,7 @@ def timeToInt(time):
     
     return hour*60 + minute
     
->>>>>>> 0ef7d5db0ecbde1bb19e12ba9919b676635645de
+def dummy(request):
+    schedule=Schedule.objects.get(pk=1)
+    mondayBlocks=schedule.monday.block_set.all()
+    return render (request,"dummy.html",{"class":mondayBlocks[1]})
