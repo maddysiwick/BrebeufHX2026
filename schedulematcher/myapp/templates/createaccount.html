@@ -18,8 +18,9 @@
 
                     <input type="email" placeholder="Email" name="email" class="form-control mb-3" required>
                     
-                    <input type="password" placeholder="Password" name="password" class="form-control mb-3" required> <br> <br>
-                    
+                    <input type="password1" placeholder="Password" name="password1" type="password" class="form-control mb-3" required>
+                    <input type="password2" placeholder="Confirm Password" name="password2" type="password" class="form-control mb-3" required> <br> <br>
+
                     <h3 style="text-align:left;">How to insert schedule PDF</h1>
                     <p>
                         1. Log into Omnivox <br>
@@ -36,6 +37,20 @@
                     <h3>Upload schedule PDF</h3> <br>
                     <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="choosefilebutton" >
                     <br><br>
+
+
+                                        
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <ul>
+                                {% for field in form %}
+                                    {% if field.errors %}
+                                        {{ field.errors }}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
 
 
                     <input type="submit" id="register" value="Create Account" style="margin-top: 30px;" class="loginbutton">

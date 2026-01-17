@@ -84,7 +84,7 @@ def home(request):
 def createaccount(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
-        print(request)
+
         if form.is_valid():
             form.save()
             
