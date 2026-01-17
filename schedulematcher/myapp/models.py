@@ -33,6 +33,6 @@ class Team(models.Model):
 
 class Request(models.Model):
     message=models.CharField(max_length=200)
-    receptor=models.ForeignKey(User,on_delete=models.SET_NULL)
-    sender=models.ForeignKey(Team,on_delete=models.SET_NULL)
+    receptor=models.ForeignKey(User,on_delete=models.SET_NULL,null=True)
+    sender=models.ForeignKey(Team,on_delete=models.SET_NULL,null=True)
     
