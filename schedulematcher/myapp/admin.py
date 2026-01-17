@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Block,Schedule,Day
 
-# Register your models here.
+admin.site.register(Block)
+admin.site.register(Schedule)
+admin.site.register(Day)
