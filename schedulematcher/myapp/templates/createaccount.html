@@ -5,15 +5,16 @@
 <main class="container-fluid d-flex justify-content-center align-items-center bg-image" style="height: 100vh;">
     <!-- Single Centered Box -->
     <div class="border rounded p-5 shadow" style="width: 600px; background-color: white; max-height: 700px; overflow-y:auto;">
-        <h1 class="mb-4" style="text-align:center;">Create Your Account</h1>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="{% static 'logooo.png' %}" alt="Schedule Matcher" style="height: auto; width: 300px;">
+        </div>
 
-        <form method="post" action="{% url 'home' %}" enctype="multipart/form-data">
+        <form method="post" action="{% url 'createaccount' %}" enctype="multipart/form-data">
             {% csrf_token %}
 
-                <form method="post" action="{% url 'home' %}">
+                <form method="post" action="{% url 'createaccount' %}">
                     {% csrf_token %}
-                    <br>
-                    <input type="username" placeholder="Username" name="username" class="form-control mb-3" style="margin-top: 50px" required>
+                    <input type="username" placeholder="Username" name="username" class="form-control mb-3" style="margin-top: 20px" required>
 
                     <input type="email" placeholder="Email" name="email" class="form-control mb-3" required>
                     
@@ -33,7 +34,7 @@
                     <br><br>
                 
                     <h3>Upload schedule PDF</h3> <br>
-                    <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="choosefilebutton" required>
+                    <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="choosefilebutton" >
                     <br><br>
 
 
