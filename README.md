@@ -1,4 +1,4 @@
-# [Insert smart project name here]
+# CommonTime
 A schedule matcher for Cégep students to find common availabilities with their friends.
 
 ## Features
