@@ -2,105 +2,119 @@
 PDF Parser for Omnivox Schedule
 """
 
-from pypdf import Pdfreader
-from json import dumps
+from pypdf import PdfReader
+import re
+
+DAY_MAP = {
+    "Mon": "Monday",
+    "Tue": "Tuesday",
+    "Wed": "Wednesday",
+    "Thu": "Thursday",
+    "Fri": "Friday"
+}
+
+class ScheduleItem:
+    def __init__(self, name, code, teacher, start_time, end_time, classroom):
+        self.name = name
+        self.code = code
+        self.teacher = teacher
+        self.startTime = start_time
+        self.endTime = end_time
+        self.classroom = classroom
+    
+    def __repr__(self):
+        return f"{self.name} {self.code} {self.teacher} {self.startTime} {self.endTime} {self.classroom}"
 
 class OmnivoxScheduleParser:
     def __init__(self, path):
-        self.path = path
-        self.reader = Pdfreader(path)
+        self.Path = path
+        self.Reader = PdfReader(path)
 
-    def extractscheduleText(self):
-        mainPage = self.reader.pages[0]
-        scheduleText = mainPage.extract_text()
-
+    def extractScheduleText(self):
+        MainPage = self.Reader.pages[0]
+        scheduleText = MainPage.extract_text()
         return scheduleText
 
-    def formatClass(self, Class):
-        if Class.strip() == "":
-            return None
+    def parseCourses(self):
+        """
+        Parse the PDF and return course data organized by day.
         
-        return Class.strip()
-
-    def extractSchedule(self):
-        scheduleText = self.extractscheduleText().split("\n")
-        isInSchedule = False
-
-        # Time: { mon, tue, wed, thu, fri }
-        Schedule = {}
-
-        for Line in scheduleText:
-            InsensitiveLine = Line.lower()
-
-            IsScheduleHeader = (
-                "mon" in InsensitiveLine and 
-                "tue" in InsensitiveLine and
-                "wed" in InsensitiveLine and
-                "thu" in InsensitiveLine and
-                "fri" in InsensitiveLine
-            )
-
-            IsScheduleFooter = (
-                "generated" in InsensitiveLine
-            )
-
-            if IsScheduleHeader:
-                isInSchedule = True
+        Returns:
+            {
+                "Monday": [
+                    ScheduleItem()
+                ],
+                "Tuesday": [...],
+                ...
+            }
+        """
+        scheduleText = self.extractScheduleText()
+        lines = scheduleText.split("\n")
+        
+        schedule = {
+            "Monday": [],
+            "Tuesday": [],
+            "Wednesday": [],
+            "Thursday": [],
+            "Friday": []
+        }
+        
+        # Thank you claude for this tuff regex
+        coursePattern = re.compile(r'^(\d+)\s{2}(.+)$')
+        codePattern = re.compile(r'^(.+?)\s+sec\.(\d+),\s*teacher:\s*(.+)$')
+        timePattern = re.compile(r'^(Mon|Tue|Wed|Thu|Fri)\s+(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2}),\s*classroom\s+(.+)$')
+        
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            
+            # Check if this is a course header line
+            courseMatch = coursePattern.match(line)
+            if not courseMatch:
+                i += 1
                 continue
 
-            if IsScheduleFooter:
-                isInSchedule = False
+            courseName = courseMatch.group(2).strip()
+            i += 1
+
+            if i > len(lines):
                 break
 
-            if isInSchedule:
-                Data = Line.split(" ")
+            codeLine = lines[i].strip()
+            codeMatch = codePattern.match(codeLine)
+            
+            if not codeMatch:
+                continue
+            
+            courseCode = codeMatch.group(1).strip()
+            teacher = codeMatch.group(3).strip()
+
+            i += 1
+            while i < len(lines):
+                timeLine = lines[i].strip()
+                timeMatch = timePattern.match(timeLine)
                 
-                Schedule[Data[0]] = {
-                    "mon": self.formatClass(Data[1]),
-                    "tue": self.formatClass(Data[2]),
-                    "wed": self.formatClass(Data[3]),
-                    "thu": self.formatClass(Data[4]),
-                    "fri": self.formatClass(Data[5]),
-                }
-        
-        return Schedule
+                if not timeMatch:
+                    break
+                
+                dayAbbrev = timeMatch.group(1)
+                startTime = timeMatch.group(2)
+                endTime = timeMatch.group(3)
+                classroom = timeMatch.group(4).strip()
+                    
+                dayFull = DAY_MAP.get(dayAbbrev, dayAbbrev)
+                
+                schedule[dayFull].append(ScheduleItem(courseName, courseCode, teacher, startTime, endTime, classroom))
+
+                i += 1
     
-    def ExtractCourses(self):
-        scheduleText = self.extractscheduleText().split("\n")
+        for day in schedule:
+            schedule[day].sort(key=lambda x: x.startTime)
         
-        # Data
-        Courses = {}
-        
-        # Context Variables
-        IsInCourses = False
-
-        JmpCount = 3
-        
-
-        for Line in scheduleText:
-            # Skip irrelevant lines
-            if IsInCourses and JmpCount > 0:
-                JmpCount -= 1
-                continue
-
-
-            InsensitiveLine = Line.lower()
-
-            IsCourse = (
-                "to access omnivox" in InsensitiveLine
-            )
-
-            if IsCourse:
-                IsInCourses = True
-                continue
-
-            # Extract courses
-            if IsInCourses:
-                Line
-        
-        return Courses
+        return schedule
 
 if __name__ == "__main__":
-    ScheduleParser = OmnivoxScheduleParser("Omnivox.pdf")
-    print(dumps(ScheduleParser.extractSchedule(), indent=4))
-    print(dumps(ScheduleParser.ExtractCourses(), indent=4))
+    parser = OmnivoxScheduleParser("Omnivox.pdf")
+    schedule = parser.parseCourses()
+
+    print(schedule)
