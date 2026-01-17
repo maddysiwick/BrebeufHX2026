@@ -1,12 +1,10 @@
 from django.shortcuts import render, HttpResponse, redirect
-from django.contrib.auth import authenticate, login, logout, get_user_model,logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from myapp.models import Block, Day,Schedule,Team,User,Request as TeamRequest
 from myapp.forms import CustomUserCreationForm
 import random, string
-from django.core.files.storage import default_storage
-import math
 import json 
 from myapp.schedule.scheduler import pdfToSchedule, generateVisualSchedule, findVacantPlage
 from django.views.decorators.http import require_POST
@@ -28,6 +26,10 @@ def welcomepage(request):
 
 def home(request):
     events = []
+    # checkTeamRequests(request)
+
+    if not request.user.is_authenticated:
+        return redirect("welcomepage")
     
     if request.method == "POST":
         try:
@@ -47,8 +49,6 @@ def home(request):
             messages.success(request, ("Denied"))
             return redirect('welcomepage')
     
-    if not request.user.is_authenticated:
-        return redirect("welcomepage")
     
     if request.user.is_authenticated and request.user.schedule:
         schedule = request.user.schedule
@@ -59,6 +59,7 @@ def home(request):
     user_teams = Team.objects.filter(members=request.user)
 
     return render(request, 'home.html', {'events': events, 'user': request.user, 'teams': user_teams})
+    return render(request, 'home.html', {'events': events})
 
 def createaccount(request):
     events = []
@@ -99,7 +100,7 @@ def creategroup(request):
         for member in members:
             receptor = User.objects.get(username=member)
             teamInviteRequest = TeamRequest(message="", sender=team, receptor=receptor)
-            resolveRequest(teamInviteRequest)
+            # resolveRequest(teamInviteRequest)
 
 def createCalendarEvent(request):
     if request.method != "POST":
@@ -186,6 +187,10 @@ def findScheduleOverlap(blockSize,blocks, earliest=480, latest=1200):
 def creategroup(request):
     return render(request, "creategroup.html")
 
+def checkTeamRequests(request):
+    requests= request.user.request_set.all()
+    print(requests)
+
 def match(request):
     return render(request, "match.html")
 
@@ -213,7 +218,7 @@ def dummy(request):
 
 def match(request):
     schedules = ...
-    block_size =30
+    block_size = 30
     today = datetime.today()
     monday = today - timedelta(days=today.weekday())
 
