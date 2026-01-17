@@ -10,7 +10,7 @@ class Block(models.Model):
     day = models.ForeignKey(Day, on_delete=models.CASCADE)
     startTime = models.IntegerField()
     endTime = models.IntegerField()
-    mandatory = models.BooleanField()
+    mandatory = models.BooleanField(default=True)
 
 class Schedule(models.Model):
     monday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="monday")
@@ -30,6 +30,7 @@ class Team(models.Model):
     name=models.CharField(max_length=100)
     plannedMeetings=models.JSONField(default=list,null=True)
     meetingSuggestions=models.JSONField(default=dict,null=True)
+
 
 class Request(models.Model):
     message=models.CharField(max_length=200)

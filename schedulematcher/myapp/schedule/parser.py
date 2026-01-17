@@ -21,6 +21,7 @@ class Course:
         self.startTime = start_time
         self.endTime = end_time
         self.classroom = classroom
+        self.mandatory = True 
 
     def __getitem__(self, key):
         return getattr(self, key)

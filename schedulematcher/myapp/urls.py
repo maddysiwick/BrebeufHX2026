@@ -2,7 +2,7 @@ from django.urls import path, include
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
-
+from .views import toggle_mandatory
 
 urlpatterns = [
     path("", views.welcomepage, name="welcomepage"),
@@ -13,4 +13,5 @@ urlpatterns = [
     path("login/", include("django.contrib.auth.urls")),
     path("creategroup/", views.creategroup, name="creategroup"),
     path("match/", views.match, name="match"),
+    path('toggle-mandatory/<int:block_id>/', toggle_mandatory, name='toggle_mandatory'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
