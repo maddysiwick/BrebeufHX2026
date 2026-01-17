@@ -25,9 +25,22 @@
                     
                     <button type="submit" class="loginbutton">Login</button>
                 </div>
+
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for field in form %}
+                                {% if field.errors %}
+                                    {{ field.errors }}
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
         </form>
 
-        <a href="{% url 'createaccount' %}" style="color: #007ea7; margin-top: 15px">
+        <a href="{% url 'createaccount' %}" style="color: #007ea7; margin-top: 15px; text-align: center;">
             <p>Don't have an account yet? Create one!</p>
         </a>
 

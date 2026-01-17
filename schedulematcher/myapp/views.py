@@ -26,9 +26,6 @@ def welcomepage(request):
 
 def home(request):
     events = []
-
-    if not request.user.is_authenticated:
-        return redirect("welcomepage")
     
     if request.method == "POST":
         try:
@@ -48,6 +45,8 @@ def home(request):
             messages.success(request, ("Denied"))
             return redirect('welcomepage')
     
+    if not request.user.is_authenticated:
+        return redirect("welcomepage")
     
     if request.user.is_authenticated and request.user.schedule:
         schedule = request.user.schedule
