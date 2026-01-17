@@ -18,4 +18,5 @@ urlpatterns = [
     path("match/", views.match, name="match"),
     path('toggle-mandatory/<int:block_id>/', toggle_mandatory, name='toggle_mandatory'),
     path('logout/', views.logout_view, name='logout'),
+    path('findcommontime/<int:team_id>/', views.findCommonTime, name='findcommontime'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

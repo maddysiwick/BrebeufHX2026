@@ -159,14 +159,69 @@ def createCalendarEvent(request):
     if request.method != "POST":
         return redirect("home")
     
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Not authenticated"})
+    
     data = json.loads(request.body.decode(encoding="utf-8", errors="strict"))
     
     schedule = request.user.schedule
+    if not schedule:
+        return JsonResponse({"success": False, "error": "No schedule found for user"})
+    
     days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday, schedule.saturday, schedule.sunday]
     day = days[data["day"]]
     
     Block.objects.create(name=data["name"], day=day, startTime=data["startTime"], endTime=data["endTime"], mandatory=data.get("mandatory", True))
     return JsonResponse({"success": True})
+
+
+def findCommonTime(request, team_id):
+    if request.method != "POST":
+        return redirect("home")
+    
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Not authenticated"})
+    
+    team = Team.objects.get(id=team_id)
+    
+    if request.user not in team.members.all():
+        return JsonResponse({"error": "Not a member of this team"})
+    
+    data = json.loads(request.body.decode(encoding="utf-8", errors="strict"))
+    duration = data.get("duration", 60)
+    
+    schedules = []
+    for member in team.members.all():
+        if member.schedule:
+            schedules.append(member.schedule)
+    
+    if not schedules:
+        return JsonResponse({"error": "No schedules found for team members"})
+    
+    vacant_slots = findVacantPlage(schedules, duration)
+    
+    start_date = datetime(2026, 1, 5)
+    day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    
+    events = []
+    for day_index, day_slots in enumerate(vacant_slots):
+        day_date = start_date + timedelta(days=day_index)
+        for slot in day_slots:
+            start_minutes, end_minutes = slot
+            start_dt = day_date.replace(hour=start_minutes // 60, minute=start_minutes % 60)
+            end_dt = day_date.replace(hour=end_minutes // 60, minute=end_minutes % 60)
+            events.append({
+                'title': 'Available',
+                'start': start_dt.isoformat(),
+                'end': end_dt.isoformat(),
+                'color': '#28a745',
+                'day': day_index,
+                'dayName': day_names[day_index],
+                'startTime': start_minutes,
+                'endTime': end_minutes
+            })
+    
+    return JsonResponse({"success": True, "events": events})
 
 
 def logout_view(request):

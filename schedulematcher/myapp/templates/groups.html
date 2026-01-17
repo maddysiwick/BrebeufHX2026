@@ -17,8 +17,8 @@
                     <h5 class="mb-0">{{user.username}}</h5>
 
                     <div style="position: absolute; right: 15px;">
-                        <button class="btn btn-outline-secondary p-2" id="plusbutton">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        <button class="btn btn-outline-secondary p-2" id="findCommonTimeButton">
+                            Find Common Time <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search-icon lucide-search"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
                         </button>
                         <button class="btn btn-outline-secondary p-2" id="notificationsButton">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell-icon lucide-bell"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
@@ -45,10 +45,10 @@
                         </div>
                         <!-- Other team members -->
                         {% for username, color in ColorMapping.items %}
-                        <div class="d-flex align-items-center" style="gap: 6px;">
-                            <div style="width: 12px; height: 12px; border-radius: 50%; background-color: {{ color }};"></div>
-                            <span style="font-size: 13px;">{{ username }}</span>
-                        </div>
+                            <div class="d-flex align-items-center" style="gap: 6px;">
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background-color: {{ color }};"></div>
+                                <span style="font-size: 13px;">{{ username }}</span>
+                            </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -78,7 +78,7 @@
     </div>
 
         
-    <div id="addEventModal" style="
+    <div id="findCommonTimeModal" style="
     display: none;
     position: fixed;
     inset: 0;
@@ -87,21 +87,25 @@
     align-items: center;
     justify-content: center;
     ">
-    <div style="background: white; padding: 20px; border-radius: 8px; width: 300px;">
-        <h5>Add Event</h5>
+    <div style="background: white; padding: 20px; border-radius: 8px; width: 350px; max-height: 80vh; overflow-y: auto;">
+        <h5>Find Common Time</h5>
+        <p class="text-muted" style="font-size: 13px;">Find available time slots when all team members are free.</p>
 
-        <label class="mt-2">Title</label>
-        <input id="eventTitle" class="form-control mb-2" type="text">
+        <label class="mt-2">Duration (minutes)</label>
+        <input id="durationInput" class="form-control mb-3" type="number" value="60" min="15" step="15">
 
-        <label>Start</label>
-        <input id="eventStart" class="form-control mb-2" type="datetime-local">
+        <button class="btn btn-primary w-100 mb-3" id="searchAvailabilityBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search me-1"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+            Search Available Times
+        </button>
 
-        <label>End</label>
-        <input id="eventEnd" class="form-control mb-3" type="datetime-local">
+        <div id="availabilityResults" style="display: none;">
+            <h6>Available Slots</h6>
+            <div id="slotsList" style="max-height: 200px; overflow-y: auto;"></div>
+        </div>
 
-        <div class="d-flex justify-content-end" style="gap: 5px;">
-            <button class="btn btn-secondary btn-sm" id="cancelEvent">Cancel</button>
-            <button class="btn btn-primary btn-sm" id="saveEvent">Add</button>
+        <div class="d-flex justify-content-end mt-3" style="gap: 5px;">
+            <button class="btn btn-secondary btn-sm" id="closeFindCommonTimeModal">Close</button>
         </div>
     </div>
     </div>
@@ -266,85 +270,11 @@
         },
     });
 
-    const plusButton = document.getElementById('plusbutton');
-    const modal = document.getElementById('addEventModal');
+    const findCommonTimeButton = document.getElementById('findCommonTimeButton');
+    const findCommonTimeModal = document.getElementById('findCommonTimeModal');
 
-    plusButton.addEventListener('click', () => {
-        modal.style.display = 'flex';
-    });
-
-    // Helper function to clear all form fields
-    function clearEventForm() {
-        document.getElementById('eventTitle').value = '';
-        document.getElementById('eventStart').value = '';
-        document.getElementById('eventEnd').value = '';
-    }
-
-    document.getElementById('cancelEvent').addEventListener('click', () => {
-        modal.style.display = 'none';
-        clearEventForm();
-    });
-
-    // Close modal when clicking outside of it
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-            clearEventForm();
-        }
-    });
-
-    document.getElementById('saveEvent').addEventListener('click', () => {
-        const title = document.getElementById('eventTitle').value;
-        const start = document.getElementById('eventStart').value;
-        const end = document.getElementById('eventEnd').value;
-
-        if (!title || !start || !end) {
-            alert('Please fill out all fields');
-            return;
-        }
-
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-        
-        const dayOfWeek = startDate.getDay();
-        const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-        
-        const startTime = startDate.getHours() * 60 + startDate.getMinutes();
-        const endTime = endDate.getHours() * 60 + endDate.getMinutes();
-
-        fetch("{% url 'createevent' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken")
-            },
-            body: JSON.stringify({
-                name: title,
-                day: dayIndex,
-                startTime: startTime,
-                endTime: endTime,
-                mandatory: false
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                ec.addEvent({
-                    title: title,
-                    start: start,
-                    end: end
-                });
-                
-                modal.style.display = 'none';
-                clearEventForm();
-            } else {
-                alert("Failed to add event");
-            }
-        })
-        .catch(error => {
-            console.error("Error adding event:", error);
-            alert("Failed to add event");
-        });
+    findCommonTimeButton.addEventListener('click', () => {
+        findCommonTimeModal.style.display = 'flex';
     });
 
     // Dropdown Menu Setup
@@ -390,6 +320,128 @@
                 popover.style.visibility = 'visible';
                 popover.dataset.trigger = button.dataset.uid || 'unknown';
             });
+        });
+    }
+
+    // Find Common Time Functionality
+    const closeFindCommonTimeModalBtn = document.getElementById('closeFindCommonTimeModal');
+    const searchAvailabilityBtn = document.getElementById('searchAvailabilityBtn');
+    const availabilityResults = document.getElementById('availabilityResults');
+    const slotsList = document.getElementById('slotsList');
+    const teamId = {{ currentTeam.id }};
+
+    closeFindCommonTimeModalBtn.addEventListener('click', () => {
+        findCommonTimeModal.style.display = 'none';
+        availabilityResults.style.display = 'none';
+        slotsList.innerHTML = '';
+    });
+
+    findCommonTimeModal.addEventListener('click', (e) => {
+        if (e.target === findCommonTimeModal) {
+            findCommonTimeModal.style.display = 'none';
+            availabilityResults.style.display = 'none';
+            slotsList.innerHTML = '';
+        }
+    });
+
+    function formatTime(minutes) {
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours % 12 || 12;
+        return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
+    }
+
+    searchAvailabilityBtn.addEventListener('click', () => {
+        const duration = parseInt(document.getElementById('durationInput').value) || 60;
+        searchAvailabilityBtn.disabled = true;
+        searchAvailabilityBtn.innerHTML = 'Searching...';
+
+        fetch(`/findcommontime/${teamId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ duration: duration })
+        })
+        .then(response => response.json())
+        .then(data => {
+            searchAvailabilityBtn.disabled = false;
+            searchAvailabilityBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search me-1"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+                Search Available Times
+            `;
+
+            if (data.success && data.events.length > 0) {
+                availabilityResults.style.display = 'block';
+                slotsList.innerHTML = '';
+
+                data.events.forEach((slot, index) => {
+                    const slotDiv = document.createElement('div');
+                    slotDiv.className = 'd-flex justify-content-between align-items-center p-2 border rounded mb-2';
+                    slotDiv.innerHTML = `
+                        <div>
+                            <p>${slot.dayName}<br>
+                                <small class="text-muted">${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}</small>
+                            </p>
+                        </div>
+                        <button class="btn btn-sm btn-success add-slot-btn" data-index="${index}">
+                            Add
+                        </button>
+                    `;
+                    slotsList.appendChild(slotDiv);
+
+                    slotDiv.querySelector('.add-slot-btn').addEventListener('click', () => {
+                        addSlotToCalendar(slot);
+                    });
+                });
+            } else if (data.success && data.events.length === 0) {
+                availabilityResults.style.display = 'block';
+                slotsList.innerHTML = '<p class="text-muted">No available time slots found. Try a shorter duration.</p>';
+            } else {
+                alert(data.error || 'Failed to find available times');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            searchAvailabilityBtn.disabled = false;
+            searchAvailabilityBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search me-1"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+                Search Available Times
+            `;
+            alert('Failed to search for available times');
+        });
+    });
+
+    function addSlotToCalendar(slot) {
+        const teamName = "{{ currentTeam.name }}";
+        
+        fetch("{% url 'createevent' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+            body: JSON.stringify({
+                name: `Team Meeting - ${teamName}`,
+                day: slot.day,
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+                mandatory: true
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Failed to save event: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error saving event:', error);
+            alert('Failed to save event: ' + error.message);
         });
     }
 

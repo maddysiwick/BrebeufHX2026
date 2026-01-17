@@ -37,11 +37,14 @@ def generateVisualSchedule(schedule, color="#007EA7"):
                 start_dt = datetime.fromisoformat(f"{block_date.date()}T{start_str}")
                 end_dt = datetime.fromisoformat(f"{block_date.date()}T{end_str}")
 
+                # Use green color for Team Meeting events
+                event_color = "#28a745" if "Team Meeting" in block.name else color
+
                 events.append({
                     'title': block.name,
                     'start': start_dt.isoformat(),
                     'end': end_dt.isoformat(),
-                    'color': color
+                    'color': event_color
                 })
     
     return events
