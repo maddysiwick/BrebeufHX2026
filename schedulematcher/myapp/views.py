@@ -102,7 +102,8 @@ def dummy(request):
     return render (request,"dummy.html")
 
 #im sorry for the unholy number of loops
-def findVacantPlage(schedules, blockSize):
+#it's fine it won't grow nearly to the size needed to become slow
+def findVacantPlage(schedules, blockSize, earliest=480, latest=1200):
     blocks=[[],[],[],[],[],[],[]]
     for schedule in schedules:
         days=[schedule.monday,schedule.tuesday,schedule.wednesday,schedule.thursday,schedule.friday,schedule.saturday,schedule.sunday]
@@ -111,7 +112,8 @@ def findVacantPlage(schedules, blockSize):
                 blocks[i].append((block.startTime,block.endTime))
     plage=[[],[],[],[],[],[],[]]
     candidates=[[],[],[],[],[],[],[]]
-    for i in range(480,1200,15):
+
+    for i in range(earliest,latest,15):
         for k in range(7):
             toRemove=[]
             for pair in candidates[k]:
