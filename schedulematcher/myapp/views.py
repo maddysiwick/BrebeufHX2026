@@ -11,5 +11,5 @@ def home(request):
 def createaccount(request):
     return render(request, "createaccount.html")
 
-def creategroupe(request):
-    return render(request, "creategroupe.html")
+def creategroup(request):
+    return render(request, "creategroup.html")
