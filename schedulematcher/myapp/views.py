@@ -358,8 +358,8 @@ def dummy(request):
 
 
 def match(request):
-    schedules = ...
-    block_size = 30
+    schedules = []
+    block_size =30
     today = datetime.today()
     monday = today - timedelta(days=today.weekday())
 
