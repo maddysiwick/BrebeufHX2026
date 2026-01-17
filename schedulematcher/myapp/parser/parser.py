@@ -2,34 +2,34 @@
 PDF Parser for Omnivox Schedule
 """
 
-from pypdf import PdfReader
+from pypdf import Pdfreader
 from json import dumps
 
 class OmnivoxScheduleParser:
     def __init__(self, path):
-        self.Path = path
-        self.Reader = PdfReader(path)
+        self.path = path
+        self.reader = Pdfreader(path)
 
-    def ExtractScheduleText(self):
-        MainPage = self.Reader.pages[0]
-        ScheduleText = MainPage.extract_text()
+    def extractscheduleText(self):
+        mainPage = self.reader.pages[0]
+        scheduleText = mainPage.extract_text()
 
-        return ScheduleText
+        return scheduleText
 
-    def FormatClass(self, Class):
+    def formatClass(self, Class):
         if Class.strip() == "":
             return None
         
         return Class.strip()
 
-    def ExtractSchedule(self):
-        ScheduleText = self.ExtractScheduleText().split("\n")
-        IsInSchedule = False
+    def extractSchedule(self):
+        scheduleText = self.extractscheduleText().split("\n")
+        isInSchedule = False
 
         # Time: { mon, tue, wed, thu, fri }
         Schedule = {}
 
-        for Line in ScheduleText:
+        for Line in scheduleText:
             InsensitiveLine = Line.lower()
 
             IsScheduleHeader = (
@@ -45,28 +45,28 @@ class OmnivoxScheduleParser:
             )
 
             if IsScheduleHeader:
-                IsInSchedule = True
+                isInSchedule = True
                 continue
 
             if IsScheduleFooter:
-                IsInSchedule = False
+                isInSchedule = False
                 break
 
-            if IsInSchedule:
+            if isInSchedule:
                 Data = Line.split(" ")
                 
                 Schedule[Data[0]] = {
-                    "mon": self.FormatClass(Data[1]),
-                    "tue": self.FormatClass(Data[2]),
-                    "wed": self.FormatClass(Data[3]),
-                    "thu": self.FormatClass(Data[4]),
-                    "fri": self.FormatClass(Data[5]),
+                    "mon": self.formatClass(Data[1]),
+                    "tue": self.formatClass(Data[2]),
+                    "wed": self.formatClass(Data[3]),
+                    "thu": self.formatClass(Data[4]),
+                    "fri": self.formatClass(Data[5]),
                 }
         
         return Schedule
     
     def ExtractCourses(self):
-        ScheduleText = self.ExtractScheduleText().split("\n")
+        scheduleText = self.extractscheduleText().split("\n")
         
         # Data
         Courses = {}
@@ -77,7 +77,7 @@ class OmnivoxScheduleParser:
         JmpCount = 3
         
 
-        for Line in ScheduleText:
+        for Line in scheduleText:
             # Skip irrelevant lines
             if IsInCourses and JmpCount > 0:
                 JmpCount -= 1
@@ -102,5 +102,5 @@ class OmnivoxScheduleParser:
 
 if __name__ == "__main__":
     ScheduleParser = OmnivoxScheduleParser("Omnivox.pdf")
-    print(dumps(ScheduleParser.ExtractSchedule(), indent=4))
+    print(dumps(ScheduleParser.extractSchedule(), indent=4))
     print(dumps(ScheduleParser.ExtractCourses(), indent=4))
