@@ -74,14 +74,17 @@
         </div>
 
       <div class="h-100 border rounded d-flex flex-column p-4 justify-content-center px-5" style="gap: 20px; overflow-y: auto;">
+        <h5>Group name:</h5>
+        <div class="d-flex flex-row align-items-center justify-content-center" style="gap: 10px;">
+          <input type="text" id="groupName" name="groupName" class="form-control" placeholder="Group Name"><br>
+        </div>
+
         <h5>Enter group-members' usernames:</h5>
         <div class="d-flex flex-row align-items-center justify-content-center" style="gap: 10px;">
           <input type="text" id="email" name="email" class="form-control" placeholder="Username"><br>
           <button type="button" id="addButton" class="addButton">Add</button>
         </div>
 
-        
-        
         <h5>Invited Members:</h5>
         <div id="emailList" class="h-100 border rounded d-flex flex-column p-4 justify-content-center px-5" style="gap: 20px; overflow-y: auto;">
           <!-- Empty State-->
@@ -169,6 +172,13 @@
 
     async function CreateGroup() {
       if (savedEmails.length <= 0) {
+        alert("Please enter at least one username");
+        return;
+      }
+
+      const groupName = document.getElementById('groupName');
+      if (groupName.value.length <= 0 || groupName.value.trim() === "") {
+        alert("Please enter a group name");
         return;
       }
       
@@ -180,10 +190,13 @@
           "X-CSRFToken": csrftoken,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(savedEmails)
+        body: JSON.stringify({
+          emails: savedEmails,
+          groupName: groupName.value
+        })
       })
 
-      console.log(response.body);
+      window.location.href = "{% url 'home' %}"
     }
 
     createGroup.addEventListener('click', () => {

@@ -135,12 +135,11 @@ def createaccount(request):
 
 def creategroup(request):
     if request.method == "POST":
-        randomName = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-        team = Team.objects.create(name=randomName)
+        data = json.loads(request.body.decode(encoding="utf-8", errors="strict"))
+        team = Team.objects.create(name=data["groupName"])
         team.members.add(request.user)
-        members = json.loads(request.body.decode(encoding="utf-8", errors="strict"))
         
-        for member in members:
+        for member in data["emails"]:
             receptor = User.objects.get(username=member)
             teamInviteRequest = TeamRequest(message="", sender=team, receptor=receptor)
             resolveRequest(teamInviteRequest)
