@@ -4,30 +4,29 @@ from myapp.models import Block, Day,Schedule
 from django.core.files.storage import default_storage
 import os
 import math
+import json
 # Create your views here.
 
 def welcomepage(request):
     return render(request, "welcomepage.html")
 
 def home(request):
+    events = []
     if request.method == "POST":
-        try:
-            pdf = request.FILES['pdfFile']
-            schedule = convert(pdf) # List of 5 lists each containing blocks
-            default_storage.save(pdf.name, pdf)
-            for i in range(len(schedule)):
-                for j in range (len(schedule[i])):
-                    block = schedule[i][j]
-                    print(block.name)
-                    print(block.startTime)
-                    print(block.endTime)
-        except:
-            print("No PDF file found")
-            #TODO Add error screen
+        pdf = request.FILES['pdfFile']
+        schedule = convert(pdf) # List of 5 lists each containing blocks
+        default_storage.save(pdf.name, pdf)
         
+        for i in range(len(schedule)):
+            for j in range (len(schedule[i])):
+                block = schedule[i][j]
+                print(i)
+                print(block.name)
+                print(block.startTime)
+                print(block.endTime)
                       
 
-    return render(request, 'home.html')
+    return render(request, 'home.html', {"events_json": json.dumps(events)})
 
 def createaccount(request):
     return render(request, "createaccount.html")
