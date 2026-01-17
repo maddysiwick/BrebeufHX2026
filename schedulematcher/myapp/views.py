@@ -14,6 +14,14 @@ def home(request):
         pdf = request.FILES['pdfFile']
         schedule = convert(pdf) # List of 5 lists each containing blocks
         default_storage.save(pdf.name, pdf)
+        for i in range(len(schedule)):
+            for j in range (len(schedule[i])):
+                block = schedule[i][j]
+                print(block.name)
+                print(block.startTime)
+                print(block.endTime)
+                      
+
     return render(request, 'home.html')
 
 def createaccount(request):
