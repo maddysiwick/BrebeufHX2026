@@ -12,7 +12,7 @@ def home(request):
     if request.method == "POST":
         pdf = request.FILES['pdfFile']
         schedule = convert(pdf) # List of 5 lists each containing blocks
-        
+        default_storage.save(pdf.name, pdf)
     return render(request, 'home.html')
 
 def createaccount(request):
