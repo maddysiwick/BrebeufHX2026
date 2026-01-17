@@ -74,7 +74,7 @@ Added lots of comments to make it easier to find where everything is
                     <h5 class="mb-0">Schedule Matcher</h5>
 
                     <div style="position: absolute; right: 15px;">
-                        <button class="btn btn-outline-secondary p-2">
+                        <button class="btn btn-outline-secondary p-2" id="notificationsButton">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell-icon lucide-bell"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
                         </button>
                     </div>
@@ -87,9 +87,15 @@ Added lots of comments to make it easier to find where everything is
             </div>
         </div>
 
-        <!-- Popover -->
-        <div id="coolpopover" style="position: absolute; display: none; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000;">
-            <p class="mb-0">Popover content</p>
+        <!-- Popovers -->
+        <div id="groupSettingsPopover" style="position: absolute; display: none; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000;">
+            <p class="mb-0">Rename Group</p>
+            <p class="mb-0 mt-2" style="color: red;">Delete Group</p>
+        </div>
+
+        <div id="notificationsPopover" style="position: absolute; display: none; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000;">
+            <p class="mb-0">Notif 1</p>
+            <p class="mb-0 mt-2" style="color: red;">Delete Notification</p>
         </div>
 
         <!-- Bottom Navigation Bar for mobile (unfinished) -->
@@ -116,31 +122,52 @@ Added lots of comments to make it easier to find where everything is
     //EventCalendar.destroy(ec);
 
     // Setup Dropdown Menu Stuff
-    const popover = document.getElementById('coolpopover');
-    const buttons = document.querySelectorAll('#groupSettings');
+    // Button ID: Popover ID
+    const DropdownMenuMapping = {
+        "groupSettings": "groupSettingsPopover",
+        "notificationsButton": "notificationsPopover"
+    }
 
-    document.addEventListener('click', function(event) {
-        if (!popover.contains(event.target) && !Array.from(buttons).some(b => b.contains(event.target))) {
-            popover.style.display = 'none';
-        }
-    });
-
-    buttons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-
-            if (popover.style.display === 'block' && popover.dataset.trigger === button.dataset.uid) {
+    for (const [buttonId, popoverId] of Object.entries(DropdownMenuMapping)) {
+        const buttons = document.querySelectorAll(`#${buttonId}`);
+        const popover = document.getElementById(popoverId);
+        
+        document.addEventListener('click', function(event) {
+            if (!popover.contains(event.target) && !Array.from(buttons).some(b => b.contains(event.target))) {
                 popover.style.display = 'none';
-                return;
             }
-
-            const rect = button.getBoundingClientRect();
-            popover.style.top = (rect.bottom + window.scrollY + 5) + 'px';
-            popover.style.left = (rect.left + window.scrollX) + 'px';
-            popover.style.display = 'block';
-            popover.dataset.trigger = button.dataset.uid || 'unknown';
         });
-    });
+    
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+    
+                if (popover.style.display === 'block' && popover.dataset.trigger === button.dataset.uid) {
+                    popover.style.display = 'none';
+                    return;
+                }
+    
+                const rect = button.getBoundingClientRect();
+                
+                // Show popover invisibly to verify specific dimensions
+                popover.style.visibility = 'hidden';
+                popover.style.display = 'block';
+
+                popover.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+                
+                // Check if button is on the right half of the screen
+                if (rect.left > window.innerWidth / 2) {
+                    popover.style.left = (rect.right + window.scrollX - popover.offsetWidth) + 'px';
+                } else {
+                    popover.style.left = (rect.left + window.scrollX) + 'px';
+                }
+                
+                popover.style.visibility = 'visible';
+                popover.dataset.trigger = button.dataset.uid || 'unknown';
+            });
+        });
+    }
+
 </script>
 
 {% endblock %}
