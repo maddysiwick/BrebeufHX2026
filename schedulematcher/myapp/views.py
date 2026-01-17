@@ -106,6 +106,7 @@ def resolveRequest(teamRequest):
     team=teamRequest.sender
     user=teamRequest.receptor
     team.members.add(user)
+    
 
     print(team.members.all())
     # TeamRequest.objects.delete(teamRequest)
@@ -122,13 +123,6 @@ def dummy(request):
 
 
 
-def creategroup(request):
-    if request.method == "POST":
-        print(request)
-        # User.objects.get()
-    
-
-    return render(request, "creategroup.html")
 
 def match(request):
     schedules = ...
@@ -139,6 +133,7 @@ def match(request):
     plage, events = findVacantPlage(schedules, block_size, start_date=monday)
 
     return render(request, "match.html", {"events": events})
+
 
 
 
