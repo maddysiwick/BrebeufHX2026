@@ -15,7 +15,7 @@ def createaccount(request):
     return render(request, "createaccount.html")
 
 def creategroup(request):
-    return render(request, "creategroupe.html")
+    return render(request, "creategroup.html")
 
 
 def convert():
