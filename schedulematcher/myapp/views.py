@@ -12,12 +12,9 @@ def home(request):
 def createaccount(request):
     return render(request, "createaccount.html")
 
-<<<<<<< HEAD
 def dummy(request):
     schedule=Schedule.objects.get(pk=1)
     mondayBlocks=schedule.monday.block_set.all()
     return render (request,"dummy.html",{"class":mondayBlocks[0]})
-=======
 def creategroup(request):
     return render(request, "creategroup.html")
->>>>>>> 60457fb007f1c005648706d6811b614082f08fcc
