@@ -1,6 +1,7 @@
 from django.shortcuts import render, HttpResponse
 from myapp.parser.parser import OmnivoxScheduleParser
 from myapp.models import Block, Day,Schedule
+from django.core.files.storage import default_storage
 import os
 # Create your views here.
 
@@ -8,7 +9,9 @@ def welcomepage(request):
     return render(request, "welcomepage.html")
 
 def home(request):
-    print(convert())
+    if request.method == "POST":
+        pdf = request.FILES['pdfFile']
+        f = default_storage.save(pdf.name, pdf)
     return render(request, 'home.html')
 
 def createaccount(request):
