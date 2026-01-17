@@ -1,4 +1,5 @@
 from django.shortcuts import render, HttpResponse
+from .models import Schedule,Block,Day
 
 # Create your views here.
 
@@ -10,3 +11,8 @@ def home(request):
 
 def home(request):
     return render(request, "createaccount.html")
+
+def dummy(request):
+    schedule=Schedule.objects.get(pk=1)
+    mondayBlocks=schedule.monday.block_set.all()
+    return render (request,"dummy.html",{"class":mondayBlocks[0]})

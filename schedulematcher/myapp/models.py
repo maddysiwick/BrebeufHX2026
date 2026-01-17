@@ -8,8 +8,8 @@ class Day(models.Model):
 class Block(models.Model):
     name = models.CharField(max_length=100)
     day = models.ForeignKey(Day, on_delete=models.CASCADE)
-    start_time = models.IntegerField()
-    end_time = models.IntegerField()
+    startTime = models.IntegerField()
+    endTime = models.IntegerField()
     mandatory = models.BooleanField()
 
 class Schedule(models.Model):
