@@ -83,6 +83,7 @@ def home(request):
 
 def createaccount(request):
     if request.method == "POST":
+        events = []
         form = CustomUserCreationForm(request.POST)
 
         if form.is_valid():
