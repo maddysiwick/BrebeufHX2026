@@ -49,8 +49,22 @@
 
         <!-- Main Content -->
         <div class="col-9 h-100">
-            <div class="h-100 p-4 border rounded d-flex flex-column">
-                <div id="calendar" style="height: 100%;"></div>
+            <div class="h-100 border rounded d-flex flex-column" style="overflow: hidden;">
+                <!-- Header Section -->
+                <div class="d-flex align-items-center px-4 border-bottom" style="height: 60px; min-height: 60px;">
+                    <h5 class="mb-0">Schedule Matcher</h5>
+
+                    <div style="position: absolute; right: 15px;">
+                        <button class="btn btn-outline-secondary p-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell-icon lucide-bell"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Calendar Section -->
+                <div class="flex-grow-1 p-4" style="overflow: hidden;">
+                    <div id="calendar" style="height: 100%;"></div>
+                </div>
             </div>
         </div>
 
