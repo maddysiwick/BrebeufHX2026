@@ -11,6 +11,7 @@ import json
 from myapp.schedule.scheduler import pdfToSchedule, generateVisualSchedule, findVacantPlage
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from datetime import datetime, timedelta
 # Create your views here.
 
 def welcomepage(request):
@@ -130,7 +131,14 @@ def creategroup(request):
     return render(request, "creategroup.html")
 
 def match(request):
-    return render(request, "match.html")
+    schedules = ...
+    block_size =30
+    today = datetime.today()
+    monday = today - timedelta(days=today.weekday())
+
+    plage, events = findVacantPlage(schedules, block_size, start_date=monday)
+
+    return render(request, "match.html", {"events": events})
 
 
 

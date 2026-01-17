@@ -110,14 +110,18 @@ Added lots of comments to make it easier to find where everything is
 </main>
 
 <script>
+
     // Calendar Setup
     // https://github.com/vkurko/calendar
+    const eventsFromDjango = JSON.parse(document.getElementById('events-data').textContent);
+    
     let ec = EventCalendar.create(document.getElementById('calendar'), {
         view: 'timeGridWeek',
         height: '100%',
-        events: [
-            // your list of events
-        ]
+        events:  eventsFromDjango
+            
+            
+        
     });
 
     //EventCalendar.destroy(ec);

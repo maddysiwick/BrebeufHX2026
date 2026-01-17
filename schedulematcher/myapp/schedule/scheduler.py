@@ -140,7 +140,7 @@ def pdfToSchedule(pdf):
 
 #im sorry for the unholy number of loops
 #it's fine it won't grow nearly to the size needed to become slow
-def findVacantPlage(schedules, blockSize, earliest=480, latest=1200):
+def findVacantPlage(schedules, blockSize, earliest=480, latest=1200, start_date=None):
     blocks=[[],[],[],[],[],[],[]]
     for schedule in schedules:
         days=[schedule.monday,schedule.tuesday,schedule.wednesday,schedule.thursday,schedule.friday,schedule.saturday,schedule.sunday]
@@ -176,5 +176,19 @@ def findVacantPlage(schedules, blockSize, earliest=480, latest=1200):
                     break
             if clear:
                 candidates[k].append([i,i+blockSize])
-    return plage
+        events = []
+        if start_date:
+            for day_idx, day_slots in enumerate(plage):
+                day_date = start_date + timedelta(days=day_idx)
+                for start_minute, end_minute in day_slots:
+                    start_time = day_date + timedelta(minutes=start_minute)
+                    end_time = day_date + timedelta(minutes=end_minute)
+                    events.append({
+                        "title": "Available",
+                        "start": start_time.isoformat(),
+                        "end": end_time.isoformat()
+                    })
+
+    return plage, events
+   
             
