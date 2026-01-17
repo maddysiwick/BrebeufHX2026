@@ -1,4 +1,35 @@
 {% extends "base.html" %} {% block title %} Home Page {% endblock %} 
 {% block content %}
-<p>hello?</p>
+
+<main class="container-fluid" style="height: 100vh; padding: 15px;">
+    <div class="row h-100">
+        <!-- Groups Sidebar -->
+        <div class="col-3 h-100">
+            <div class="h-100 p-4 border rounded d-flex flex-column">
+                <!-- Empty State -->
+                <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                    <!-- Lucide Icon -->
+                    <div class="mb-2 bg-light p-2 rounded">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon lucide-users-round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+                    </div>
+
+                    <p class="text-center mb-3">
+                        This is empty <br />
+                        <span class="text-muted">Create a new group</span>
+                    </p>
+
+                    <button class="btn btn-outline-secondary">Create Group</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-9 h-100">
+            <div class="h-100 p-4 border rounded d-flex flex-column">
+                <p>Groups</p>
+            </div>
+        </div>
+    </div>
+</main>
+
 {% endblock %}
