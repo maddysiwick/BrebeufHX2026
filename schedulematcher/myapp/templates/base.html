@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -11,9 +12,10 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"  rel="stylesheet" />
 
     <style>
+        
         body {
             background-color: #DFF8FF
-        }
+        }   
 
         .col-3 .border {
             background-color: white;
@@ -27,6 +29,32 @@
         #notificationsPopover {
         background-color: white;
         }
+
+        .bg-image {
+            background-image: url("{% static 'loginbackground.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+
+        .loginbutton {
+            background-color: #007EA7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 50%;
+            display: block;
+            margin: 0 auto;
+            
+
+
+        }
+
+
+
     </style>
 
 
