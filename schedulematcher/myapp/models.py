@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth import AbstractUser
+from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     pass
@@ -22,8 +22,6 @@ class Schedule(models.Model):
     friday=models.ForeignKey(Day)
     saturday=models.ForeignKey(Day)
     sunday=models.ForeignKey(Day)
-
-
 
 
 
