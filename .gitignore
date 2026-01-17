@@ -1,3 +1,9 @@
+# Python Environement
 venv/*
-__pycache__
+
+# MacOS
 .DS_Store
+
+# Python temporary files
+__pycache__/
+*.pyc

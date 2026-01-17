@@ -23,7 +23,7 @@ class ScheduleItem:
         self.classroom = classroom
     
     def __repr__(self):
-        return f"{self.name} {self.code} {self.teacher} {self.startTime} {self.endTime} {self.classroom}"
+        return f"ScheduleItem({self.name}, {self.code}, {self.teacher}, {self.startTime}, {self.endTime}, {self.classroom})"
 
 class OmnivoxScheduleParser:
     def __init__(self, path):

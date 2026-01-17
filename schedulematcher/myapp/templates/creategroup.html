@@ -1,0 +1,17 @@
+{% extends "base.html" %} {% block title %} Home Page {% endblock %} 
+{% block content %}
+
+<h1 style="text-align:center;">Welcome to Schedule Matcher</h1>
+
+<form method="post" action="{% url 'home' %}">
+    {% csrf_token %}
+      
+    <p>Create Group</p>
+    
+    
+
+
+   
+</form>
+
+{% endblock %}
