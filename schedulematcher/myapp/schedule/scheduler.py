@@ -137,3 +137,44 @@ def pdfToSchedule(pdf):
     block_lists = [monday_blocks, tuesday_blocks, wednesday_blocks, thursday_blocks, friday_blocks]
     
     return (schedule_obj, block_lists)
+
+#im sorry for the unholy number of loops
+#it's fine it won't grow nearly to the size needed to become slow
+def findVacantPlage(schedules, blockSize, earliest=480, latest=1200):
+    blocks=[[],[],[],[],[],[],[]]
+    for schedule in schedules:
+        days=[schedule.monday,schedule.tuesday,schedule.wednesday,schedule.thursday,schedule.friday,schedule.saturday,schedule.sunday]
+        for i in range(len(days)):
+            for block in days[i].block_set.all():
+                blocks[i].append((block.startTime,block.endTime))
+    plage=[[],[],[],[],[],[],[]]
+    candidates=[[],[],[],[],[],[],[]]
+
+    for i in range(earliest,latest,15):
+        for k in range(7):
+            toRemove=[]
+            for pair in candidates[k]:
+                if pair[0]==pair[1]:
+                    toRemove.append(pair)
+            for pair in toRemove:
+                plage[k].append((pair[0]-blockSize,pair[1]))
+                candidates[k].remove(pair)
+            for l in range(len(candidates[k])):
+                candidates[k][l][0]+=15
+            toRemove=[]
+            for candidate in candidates[k]:
+                for block in blocks[k]:
+                    if block[0]<candidate[0]<block[1]:
+                        toRemove.append(candidate)
+                        break
+            for item in toRemove:
+                candidates[k].remove(item)
+            clear=True
+            for block in blocks[k]:
+                if block[0]<i<block[1]:
+                    clear=False
+                    break
+            if clear:
+                candidates[k].append([i,i+blockSize])
+    return plage
+            
