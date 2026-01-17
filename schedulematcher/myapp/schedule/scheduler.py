@@ -20,32 +20,58 @@ def intToTime(time):
 # Schedule Stuff
 def generateVisualSchedule(schedule, color="#007EA7"):
     events = []
-    weekday_map = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4} 
-    start_date = datetime(2026, 1, 5)
+    weekday_map = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6} 
+    start_date = datetime(2026, 1, 5)  # First Monday of calendar
+    num_weeks = 52  # Generate a full year of events
 
-    for week in range(4):
-        for day_index, day_blocks in enumerate(schedule):
-            for block in day_blocks:
-                # Get block date
-                block_date = start_date + timedelta(days=weekday_map[day_index] + week*7)
+    for day_index, day_blocks in enumerate(schedule):
+        for block in day_blocks:
+            is_recurring = getattr(block, 'isRecurring', True)
+            specific_date = getattr(block, 'specificDate', None)
+            
+            if is_recurring:
+                # Recurring event - show on every week
+                for week in range(num_weeks):
+                    block_date = start_date + timedelta(days=weekday_map[day_index] + week*7)
+                    
+                    # Convert integer times to "HH:MM" string
+                    start_str = intToTime(block.startTime)
+                    end_str = intToTime(block.endTime)
 
-                # Convert integer times to "HH:MM" string
-                start_str = intToTime(block.startTime)
-                end_str = intToTime(block.endTime)
+                    start_dt = datetime.fromisoformat(f"{block_date.date()}T{start_str}")
+                    end_dt = datetime.fromisoformat(f"{block_date.date()}T{end_str}")
 
-                # Combine with block date to make ISO datetime
-                start_dt = datetime.fromisoformat(f"{block_date.date()}T{start_str}")
-                end_dt = datetime.fromisoformat(f"{block_date.date()}T{end_str}")
+                    event_color = "#28a745" if "Team Meeting" in block.name else color
 
-                # Use green color for Team Meeting events
-                event_color = "#28a745" if "Team Meeting" in block.name else color
-
-                events.append({
-                    'title': block.name,
-                    'start': start_dt.isoformat(),
-                    'end': end_dt.isoformat(),
-                    'color': event_color
-                })
+                    events.append({
+                        'id': block.id,
+                        'title': block.name,
+                        'start': start_dt.isoformat(),
+                        'end': end_dt.isoformat(),
+                        'color': event_color,
+                        'editable': True,
+                        'isRecurring': True
+                    })
+            else:
+                # One-time event - only show on its specific date
+                if specific_date:
+                    start_str = intToTime(block.startTime)
+                    end_str = intToTime(block.endTime)
+                    
+                    start_dt = datetime.fromisoformat(f"{specific_date}T{start_str}")
+                    end_dt = datetime.fromisoformat(f"{specific_date}T{end_str}")
+                    
+                    event_color = "#28a745" if "Team Meeting" in block.name else color
+                    
+                    events.append({
+                        'id': block.id,
+                        'title': block.name,
+                        'start': start_dt.isoformat(),
+                        'end': end_dt.isoformat(),
+                        'color': event_color,
+                        'editable': True,
+                        'isRecurring': False
+                    })
     
     return events
 

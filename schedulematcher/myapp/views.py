@@ -12,6 +12,9 @@ from django.http import JsonResponse
 from datetime import datetime, timedelta
 from myapp.models import Block, Day,Schedule,Team,User
 
+def asJSON(request):
+    return json.loads(request.body.decode(encoding="utf-8", errors="strict"))
+
 # Create your views here.
 
 def welcomepage(request):
@@ -76,6 +79,26 @@ def generateRandomColor(seed_text=None):
         return generateRandomColor((seed_text or "") + "alt")
     
     return color
+
+def renameGroup(request, team_id):
+    if request.method != "POST":
+        return JsonResponse({"success": False})
+    
+    team = Team.objects.get(id=team_id)
+    if request.user is None or request.user not in team.members.all():
+        return JsonResponse({"success": False})
+    
+    team.name = asJSON(request)["name"]
+    team.save()
+    return JsonResponse({"success": True})
+
+def leaveGroup(request, team_id):
+    team = Team.objects.get(id=team_id)
+    if request.user is None or request.user not in team.members.all():
+        return JsonResponse({"success": False})
+    
+    team.members.remove(request.user)
+    return JsonResponse({"success": True})
 
 # terrible implementation cuz its just regular counter but no time to make it a uuid
 def groupDetail(request, id):
@@ -185,8 +208,126 @@ def createCalendarEvent(request):
     days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday, schedule.saturday, schedule.sunday]
     day = days[data["day"]]
     
-    Block.objects.create(name=data["name"], day=day, startTime=data["startTime"], endTime=data["endTime"], mandatory=data.get("mandatory", True))
-    return JsonResponse({"success": True})
+    isRecurring = data.get("isRecurring", True)
+    specificDate = data.get("specificDate", None)
+    repeatCount = data.get("repeatCount", 0)  # 0 means infinite/weekly
+    
+    created_blocks = []
+    
+    if isRecurring:
+        # Weekly recurring event - just create one block
+        block = Block.objects.create(
+            name=data["name"], 
+            day=day, 
+            startTime=data["startTime"], 
+            endTime=data["endTime"], 
+            mandatory=data.get("mandatory", False),
+            isRecurring=True,
+            specificDate=None
+        )
+        created_blocks.append(block.id)
+    else:
+        # One-time or repeat for N weeks
+        from datetime import datetime, timedelta
+        base_date = datetime.fromisoformat(specificDate).date() if specificDate else None
+        
+        if repeatCount > 0:
+            # Create N one-time events
+            for i in range(repeatCount):
+                event_date = base_date + timedelta(weeks=i) if base_date else None
+                block = Block.objects.create(
+                    name=data["name"], 
+                    day=day, 
+                    startTime=data["startTime"], 
+                    endTime=data["endTime"], 
+                    mandatory=data.get("mandatory", False),
+                    isRecurring=False,
+                    specificDate=event_date
+                )
+                created_blocks.append(block.id)
+        else:
+            # Single one-time event
+            block = Block.objects.create(
+                name=data["name"], 
+                day=day, 
+                startTime=data["startTime"], 
+                endTime=data["endTime"], 
+                mandatory=data.get("mandatory", False),
+                isRecurring=False,
+                specificDate=base_date
+            )
+            created_blocks.append(block.id)
+    
+    return JsonResponse({"success": True, "block_ids": created_blocks})
+
+
+def deleteCalendarEvent(request, block_id):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "POST required"})
+    
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Not authenticated"})
+    
+    schedule = request.user.schedule
+    if not schedule:
+        return JsonResponse({"success": False, "error": "No schedule found"})
+    
+    # Get all days from user's schedule
+    user_days = [schedule.monday, schedule.tuesday, schedule.wednesday, 
+                 schedule.thursday, schedule.friday, schedule.saturday, schedule.sunday]
+    user_day_ids = [d.id for d in user_days]
+    
+    try:
+        block = Block.objects.get(id=block_id)
+        # Check if this block belongs to the user's schedule
+        if block.day.id not in user_day_ids:
+            return JsonResponse({"success": False, "error": "Not your event"})
+        
+        block.delete()
+        return JsonResponse({"success": True})
+    except Block.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Event not found"})
+
+
+def updateCalendarEvent(request, block_id):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "POST required"})
+    
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Not authenticated"})
+    
+    schedule = request.user.schedule
+    if not schedule:
+        return JsonResponse({"success": False, "error": "No schedule found"})
+    
+    # Get all days from user's schedule
+    user_days = [schedule.monday, schedule.tuesday, schedule.wednesday, 
+                 schedule.thursday, schedule.friday, schedule.saturday, schedule.sunday]
+    user_day_ids = [d.id for d in user_days]
+    
+    try:
+        block = Block.objects.get(id=block_id)
+        # Check if this block belongs to the user's schedule
+        if block.day.id not in user_day_ids:
+            return JsonResponse({"success": False, "error": "Not your event"})
+        
+        data = json.loads(request.body.decode(encoding="utf-8", errors="strict"))
+        
+        # Update day if provided
+        if "day" in data:
+            new_day_index = data["day"]
+            block.day = user_days[new_day_index]
+        
+        # Update times if provided
+        if "startTime" in data:
+            block.startTime = data["startTime"]
+        if "endTime" in data:
+            block.endTime = data["endTime"]
+        
+        block.save()
+        return JsonResponse({"success": True})
+    except Block.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Event not found"})
 
 
 def findCommonTime(request, team_id):

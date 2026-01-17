@@ -58,6 +58,13 @@
     </div>
 </div>
 
+<!-- Popovers -->
+<div id="groupSettingsPopover" style="position: absolute; display: none; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000;">
+    <p class="mb-0" style="cursor: pointer;" id="renameGroup">Rename</p>
+    <p class="mb-0 mt-2" style="color: red;" style="cursor: pointer;" id="leaveGroup">Leave</p>
+</div>
+
+
 <script>
     function getCookie(name) {
         let cookieValue = null;
@@ -111,6 +118,51 @@
         });
     }
 
+    async function renameGroup(groupId) {
+        const newName = prompt("Enter new group name:");
+        if (!newName) return;
+        const csrftoken = getCookie('csrftoken');
+        try {
+            const response = await fetch(`/rename-group/${groupId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name: newName })
+            });
+            const data = await response.json();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert("Error: " + (data.error || "Failed to rename group"));
+            }
+        } catch (error) {
+            console.error("Error renaming group:", error);
+        }
+    }
+
+    async function leaveGroup(groupId) {
+        const csrftoken = getCookie('csrftoken');
+        try {
+            const response = await fetch(`/leave-group/${groupId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/json"
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert("Error: " + (data.error || "Failed to leave group"));
+            }
+        } catch (error) {
+            console.error("Error leaving group:", error);
+        }
+    }
+
     async function resolveInvite(requestId, action) {
         const url = action === 'accept' ? `/accept-request/${requestId}/` : `/reject-request/${requestId}/`;
         const csrftoken = getCookie('csrftoken');
@@ -140,4 +192,67 @@
     // Initial poll and set interval
     pollRequests();
     setInterval(pollRequests, 10000);
+
+    const DropdownMenuMapping = {
+        "groupSettings": "groupSettingsPopover"
+    }
+
+    let CurrentContextGroupId = null;
+
+    for (const [buttonId, popoverId] of Object.entries(DropdownMenuMapping)) {
+        const buttons = document.querySelectorAll(`.${buttonId}`);
+        const popover = document.getElementById(popoverId);
+        
+        document.addEventListener('click', function(event) {
+            if (!popover.contains(event.target) && !Array.from(buttons).some(b => b.contains(event.target))) {
+                popover.style.display = 'none';
+                CurrentContextGroupId = null;
+            }
+        });
+
+        document.getElementById("renameGroup").addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            renameGroup(CurrentContextGroupId);
+        });
+
+        document.getElementById("leaveGroup").addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            leaveGroup(CurrentContextGroupId);
+        });
+    
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                CurrentContextGroupId = button.dataset.teamId;
+    
+                if (popover.style.display === 'block' && popover.dataset.trigger === button.dataset.uid) {
+                    popover.style.display = 'none';
+                    return;
+                }
+    
+                const rect = button.getBoundingClientRect();
+                
+                // Show popover invisibly to verify specific dimensions
+                popover.style.visibility = 'hidden';
+                popover.style.display = 'block';
+
+                popover.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+                
+                // Check if button is on the right half of the screen
+                if (rect.left > window.innerWidth / 2) {
+                    popover.style.left = (rect.right + window.scrollX - popover.offsetWidth) + 'px';
+                } else {
+                    popover.style.left = (rect.left + window.scrollX) + 'px';
+                }
+                
+                popover.style.visibility = 'visible';
+                popover.dataset.trigger = button.dataset.uid || 'unknown';
+            });
+        });
+    }
+
 </script>

@@ -11,6 +11,8 @@ class Block(models.Model):
     startTime = models.IntegerField()
     endTime = models.IntegerField()
     mandatory = models.BooleanField(default=True)
+    isRecurring = models.BooleanField(default=True)  # False = one-time event
+    specificDate = models.DateField(null=True, blank=True)  # For one-time events only
 
 class Schedule(models.Model):
     monday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="monday")
