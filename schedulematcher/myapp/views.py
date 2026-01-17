@@ -22,6 +22,7 @@ def welcomepage(request):
 
 def home(request):
     events = []
+    
     if request.method == "POST":
         
         try:
@@ -40,6 +41,13 @@ def home(request):
             print("denied")
             messages.success(request, ("Denied"))
             return redirect('welcomepage')
+    
+    
+    if request.user.is_authenticated and request.user.schedule:
+        schedule = request.user.schedule
+        days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday]
+        block_lists = [list(day.block_set.all()) for day in days]
+        events = generateVisualSchedule(block_lists)
 
     return render(request, 'home.html', {'events': events})
 
@@ -59,8 +67,12 @@ def createaccount(request):
             except:
                 return redirect("welcomepage")
             
-            schedule = pdfToSchedule(pdf) # List of 5 lists each containing blocks
-            events = generateVisualSchedule(schedule)
+            # Parse PDF and save schedule to user
+            schedule_obj, block_lists = pdfToSchedule(pdf)
+            user.schedule = schedule_obj
+            user.save()
+            
+            events = generateVisualSchedule(block_lists)
             return render(request, 'home.html', {'events': events})
         
         

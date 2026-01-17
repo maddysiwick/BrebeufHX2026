@@ -58,52 +58,82 @@ def generateVisualSchedule(schedule):
 
 def pdfToSchedule(pdf):
     parse = OmnivoxScheduleParser(pdf)
-    schedule = parse.parseCourses()
+    parsed_data = parse.parseCourses()
 
-    monday = []
-    tuesday = []
-    wednesday = []
-    thursday = []
-    friday = []
+    monday_day = Day.objects.create(name="Monday")
+    tuesday_day = Day.objects.create(name="Tuesday")
+    wednesday_day = Day.objects.create(name="Wednesday")
+    thursday_day = Day.objects.create(name="Thursday")
+    friday_day = Day.objects.create(name="Friday")
+    saturday_day = Day.objects.create(name="Saturday")
+    sunday_day = Day.objects.create(name="Sunday")
 
-    for i in range(len(schedule["Monday"])):
-        day = Day.objects.create(name="Monday")
-        monday.append(Block.objects.create(name=schedule["Monday"][i].name, 
-                                           startTime=timeToInt(schedule["Monday"][i].startTime), 
-                                           endTime=timeToInt(schedule["Monday"][i].endTime),
-                                           mandatory=True,
-                                           day=day))
+    # Create blocks for each day
+    monday_blocks = []
+    for course in parsed_data["Monday"]:
+        block = Block.objects.create(
+            name=course.name,
+            startTime=timeToInt(course.startTime),
+            endTime=timeToInt(course.endTime),
+            mandatory=True,
+            day=monday_day
+        )
+        monday_blocks.append(block)
 
-    for i in range(len(schedule["Tuesday"])):
-        day = Day.objects.create(name="Tuesday")
-        tuesday.append(Block.objects.create(name=schedule["Tuesday"][i].name, 
-                                            startTime=timeToInt(schedule["Tuesday"][i].startTime), 
-                                            endTime=timeToInt(schedule["Tuesday"][i].endTime),
-                                            mandatory=True,
-                                            day=day))
+    tuesday_blocks = []
+    for course in parsed_data["Tuesday"]:
+        block = Block.objects.create(
+            name=course.name,
+            startTime=timeToInt(course.startTime),
+            endTime=timeToInt(course.endTime),
+            mandatory=True,
+            day=tuesday_day
+        )
+        tuesday_blocks.append(block)
+
+    wednesday_blocks = []
+    for course in parsed_data["Wednesday"]:
+        block = Block.objects.create(
+            name=course.name,
+            startTime=timeToInt(course.startTime),
+            endTime=timeToInt(course.endTime),
+            mandatory=True,
+            day=wednesday_day
+        )
+        wednesday_blocks.append(block)
+
+    thursday_blocks = []
+    for course in parsed_data["Thursday"]:
+        block = Block.objects.create(
+            name=course.name,
+            startTime=timeToInt(course.startTime),
+            endTime=timeToInt(course.endTime),
+            mandatory=True,
+            day=thursday_day
+        )
+        thursday_blocks.append(block)
+
+    friday_blocks = []
+    for course in parsed_data["Friday"]:
+        block = Block.objects.create(
+            name=course.name,
+            startTime=timeToInt(course.startTime),
+            endTime=timeToInt(course.endTime),
+            mandatory=True,
+            day=friday_day
+        )
+        friday_blocks.append(block)
+
+    schedule_obj = Schedule.objects.create(
+        monday=monday_day,
+        tuesday=tuesday_day,
+        wednesday=wednesday_day,
+        thursday=thursday_day,
+        friday=friday_day,
+        saturday=saturday_day,
+        sunday=sunday_day
+    )
+
+    block_lists = [monday_blocks, tuesday_blocks, wednesday_blocks, thursday_blocks, friday_blocks]
     
-    for i in range(len(schedule["Wednesday"])):
-        day = Day.objects.create(name="Wednesday")
-        wednesday.append(Block.objects.create(name=schedule["Wednesday"][i].name, 
-                                              startTime=timeToInt(schedule["Wednesday"][i].startTime), 
-                                              endTime=timeToInt(schedule["Wednesday"][i].endTime),
-                                              mandatory=True,
-                                              day=day))
-        
-    for i in range(len(schedule["Thursday"])):
-        day = Day.objects.create(name="Thursday")
-        thursday.append(Block.objects.create(name=schedule["Thursday"][i].name, 
-                                             startTime=timeToInt(schedule["Thursday"][i].startTime), 
-                                             endTime=timeToInt(schedule["Thursday"][i].endTime),
-                                             mandatory=True,
-                                             day=day))
-        
-    for i in range(len(schedule["Friday"])):
-        day = Day.objects.create(name="Friday")
-        friday.append(Block.objects.create(name=schedule["Friday"][i].name, 
-                                           startTime=timeToInt(schedule["Friday"][i].startTime), 
-                                           endTime=timeToInt(schedule["Friday"][i].endTime),
-                                           mandatory=True,
-                                           day=day))
-    
-    return [monday, tuesday, wednesday, thursday, friday]
+    return (schedule_obj, block_lists)
