@@ -13,13 +13,13 @@ class Block(models.Model):
     mandatory = models.BooleanField()
 
 class Schedule(models.Model):
-    monday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="monday")
-    tuesday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="tuesday")
-    wednesday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="wednesday")
-    thursday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="thursday")
-    friday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="friday")
-    saturday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="saturday")
-    sunday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="sunday")
+    monday=models.ForeignKey(Day, on_delete=models.CASCADE)
+    tuesday=models.ForeignKey(Day, on_delete=models.CASCADE)
+    wednesday=models.ForeignKey(Day, on_delete=models.CASCADE)
+    thursday=models.ForeignKey(Day, on_delete=models.CASCADE)
+    friday=models.ForeignKey(Day, on_delete=models.CASCADE)
+    saturday=models.ForeignKey(Day, on_delete=models.CASCADE)
+    sunday=models.ForeignKey(Day, on_delete=models.CASCADE)
 
 
 
