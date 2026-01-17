@@ -13,7 +13,7 @@ DAY_MAP = {
     "Fri": "Friday"
 }
 
-class ScheduleItem:
+class Course:
     def __init__(self, name, code, teacher, start_time, end_time, classroom):
         self.name = name
         self.code = code
@@ -23,7 +23,7 @@ class ScheduleItem:
         self.classroom = classroom
     
     def __repr__(self):
-        return f"ScheduleItem({self.name}, {self.code}, {self.teacher}, {self.startTime}, {self.endTime}, {self.classroom})"
+        return f"Course({self.name}, {self.code}, {self.teacher}, {self.startTime}, {self.endTime}, {self.classroom})"
 
 class OmnivoxScheduleParser:
     def __init__(self, path):
@@ -42,7 +42,7 @@ class OmnivoxScheduleParser:
         Returns:
             {
                 "Monday": [
-                    ScheduleItem()
+                    Course()
                 ],
                 "Tuesday": [...],
                 ...
@@ -104,7 +104,7 @@ class OmnivoxScheduleParser:
                     
                 dayFull = DAY_MAP.get(dayAbbrev, dayAbbrev)
                 
-                schedule[dayFull].append(ScheduleItem(courseName, courseCode, teacher, startTime, endTime, classroom))
+                schedule[dayFull].append(Course(courseName, courseCode, teacher, startTime, endTime, classroom))
 
                 i += 1
     
