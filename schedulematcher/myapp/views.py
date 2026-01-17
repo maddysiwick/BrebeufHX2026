@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from myapp.models import Block, Day,Schedule,Team,User,Request as TeamRequest
 from myapp.forms import CustomUserCreationForm
-import random, string
+import random, string, hashlib, colorsys
 import json 
 from myapp.schedule.scheduler import pdfToSchedule, generateVisualSchedule, findVacantPlage
 from django.views.decorators.http import require_POST
@@ -59,10 +59,22 @@ def home(request):
 
     return render(request, 'home.html', {'events': events, 'user': request.user, 'teams': user_teams})
 
-def generateRandomColor():
-    color = "#" + ''.join(random.choices(string.hexdigits, k=6))
-    if color == "#007EA7":
-        return generateRandomColor()
+def generateRandomColor(seed_text=None):
+    if seed_text:
+        seed = int(hashlib.sha256(seed_text.encode('utf-8')).hexdigest(), 16)
+        random_gen = random.Random(seed)
+    else:
+        random_gen = random.Random()
+
+    h = random_gen.random()
+    s = 0.65 + random_gen.random() * 0.2
+    l = 0.35 + random_gen.random() * 0.2
+    
+    r, g, b = colorsys.hls_to_rgb(h, l, s)
+    color = '#%02x%02x%02x' % (int(r * 255), int(g * 255), int(b * 255))
+
+    if color.upper() == "#007EA7":
+        return generateRandomColor((seed_text or "") + "alt")
     
     return color
 
@@ -86,21 +98,23 @@ def groupDetail(request, id):
     user_teams = Team.objects.filter(members=request.user)
 
     ColorMapping = {}
-    user_events = []
+    all_events = []
+    
+    if events:
+        all_events.extend(events)
+
     for user in team.members.all():
         if user == request.user:
             continue
 
-        user_color = generateRandomColor()
+        user_color = generateRandomColor(user.username)
         ColorMapping[user.username] = user_color
         if user.schedule:
             schedule = user.schedule
             days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday]
             block_lists = [list(day.block_set.all()) for day in days]
-            events = generateVisualSchedule(block_lists, color=user_color)
-            user_events.append(events)
-    
-    all_events = [*user_events, *events]
+            member_events = generateVisualSchedule(block_lists, color=user_color)
+            all_events.extend(member_events)
 
     return render(request, 'groups.html', {'currentTeam': team, 'teams': user_teams, 'events': all_events, 'ColorMapping': ColorMapping})
 
