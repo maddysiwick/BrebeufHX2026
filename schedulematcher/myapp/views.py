@@ -3,6 +3,7 @@ from myapp.parser.parser import OmnivoxScheduleParser
 from myapp.models import Block, Day,Schedule
 from django.core.files.storage import default_storage
 import os
+import math
 # Create your views here.
 
 def welcomepage(request):
@@ -79,7 +80,12 @@ def timeToInt(time):
     minute = int(time.split(":")[1])
     
     return hour*60 + minute
-    
+
+def intToTime(time):
+    hour = math.floor(time/60)
+    minutes = time % 60
+    return str(hour).zfill(2) + ":" + str(minutes).zfill(2)
+
 def dummy(request):
     schedule=Schedule.objects.get(pk=1)
     mondayBlocks=schedule.monday.block_set.all()
