@@ -1,6 +1,9 @@
 {% extends "base.html" %} {% block title %} Home Page {% endblock %} 
 {% block content %}
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@event-calendar/build@5.2.3/dist/event-calendar.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@event-calendar/build@5.2.3/dist/event-calendar.min.js"></script>
+
 <main class="container-fluid" style="height: 100vh; padding: 15px;">
     <div class="row h-100 no-gutters">
         <!-- Groups Sidebar -->
@@ -26,7 +29,7 @@
         <!-- Main Content -->
         <div class="col-9 h-100">
             <div class="h-100 p-4 border rounded d-flex flex-column">
-                <p>Groups</p>
+                <div id="calendar" style="height: 100%;"></div>
             </div>
         </div>
 
@@ -40,4 +43,16 @@
     </div>
 </main>
 
+<script>
+    // https://github.com/vkurko/calendar
+    let ec = EventCalendar.create(document.getElementById('calendar'), {
+        view: 'timeGridWeek',
+        events: [
+            // your list of events
+        ]
+    });
+
+    // If you later need to destroy the calendar then use
+    //EventCalendar.destroy(ec);
+</script>
 {% endblock %}
