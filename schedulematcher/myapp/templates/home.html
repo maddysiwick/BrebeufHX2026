@@ -76,12 +76,16 @@ Added lots of comments to make it easier to find where everything is
                     <h5 class="mb-0">Schedule Matcher</h5>
 
                     <div style="position: absolute; right: 15px;">
+                        <button class="btn btn-outline-secondary p-2" id="plusbutton">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        </button>
                         <button class="btn btn-outline-secondary p-2" id="notificationsButton">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell-icon lucide-bell"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
                         </button>
                         <button class="btn btn-outline-secondary p-2" id="homebutton">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                         </button>
+                        
                     </div>
                 </div>
                 
@@ -101,7 +105,7 @@ Added lots of comments to make it easier to find where everything is
 
         <div id="notificationsPopover" style="position: absolute; display: none; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000;">
             <p class="mb-0">Group requests</p>
-            <button class="btn btn-outline-secondary mt-2">Mark as Read</button>
+            <button class="btn btn-outline-secondary mt-2">Accept</button>
         </div>
 
         <!-- Bottom Navigation Bar for mobile (unfinished) -->
@@ -113,6 +117,63 @@ Added lots of comments to make it easier to find where everything is
         </div>
         
     </div>
+
+        
+    <div id="addEventModal" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    ">
+    <div style="background: white; padding: 20px; border-radius: 8px; width: 300px;">
+        <h5>Add Event</h5>
+
+        <label class="mt-2">Title</label>
+        <input id="eventTitle" class="form-control mb-2" type="text">
+
+        <label>Start</label>
+        <input id="eventStart" class="form-control mb-2" type="datetime-local">
+
+        <label>End</label>
+        <input id="eventEnd" class="form-control mb-3" type="datetime-local">
+
+        <div class="d-flex justify-content-end gap-2">
+            <button class="btn btn-secondary btn-sm" id="cancelEvent">Cancel</button>
+            <button class="btn btn-primary btn-sm" id="saveEvent">Add</button>
+        </div>
+    </div>
+    </div>
+    <div id="eventCheckModal" style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+        ">
+        <div style="background: white; padding: 20px; border-radius: 8px; width: 300px;">
+            <h5 id="clickedEventTitle"></h5>
+
+            <div class="form-check my-3">
+            <input class="form-check-input" type="checkbox" id="eventChecked">
+            <label class="form-check-label">
+                Mark as selected
+            </label>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+            <button class="btn btn-secondary btn-sm" id="closeEventCheck">
+                Close
+            </button>
+            </div>
+        </div>
+        </div>
+
+
 </main>
 
 
@@ -218,26 +279,64 @@ Added lots of comments to make it easier to find where everything is
 
     // Calendar Setup
     // https://github.com/vkurko/calendar
+
+    // Django CSRF helper
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
     
    const events = JSON.parse(document.getElementById('events-data').textContent);
 
-    // Initialize the calendar with events
+   
     let ec = EventCalendar.create(document.getElementById('calendar'), {
         view: 'timeGridWeek',
         height: '100%',
         events: events,
-        visibleRnage: {
+        visibleRange: {
             start: '2026-01-01',  
-            end: '2026-09-01' 
-        }
+            end: '2026-09-01' ,
+        },
     });
 
+    const plusButton = document.getElementById('plusbutton');
+    const modal = document.getElementById('addEventModal');
+
+    plusButton.addEventListener('click', () => {
+        modal.style.display = 'flex';
+    });
+
+    document.getElementById('cancelEvent').addEventListener('click', () => {
+    modal.style.display = 'none';
+    });
+
+
+    document.getElementById('saveEvent').addEventListener('click', () => {
+    const title = document.getElementById('eventTitle').value;
+    const start = document.getElementById('eventStart').value;
+    const end = document.getElementById('eventEnd').value;
+
+    if (!title || !start || !end) {
+        alert('Please fill out all fields');
+        return;
+    }
+
+    ec.addEvent({
+        title: title,
+        start: start,
+        end: end
+    });
+
+    // Close + reset
+    modal.style.display = 'none';
+    document.getElementById('eventTitle').value = '';
+    document.getElementById('eventStart').value = '';
+    document.getElementById('eventEnd').value = '';
+    });
 
 
     //EventCalendar.destroy(ec);
 
-    // Setup Dropdown Menu Stuff
-    // Button ID: Popover ID
+    
     const DropdownMenuMapping = {
         "groupSettings": "groupSettingsPopover",
         "notificationsButton": "notificationsPopover"
@@ -283,6 +382,9 @@ Added lots of comments to make it easier to find where everything is
         });
     }
 
+
+
 </script>
+
 
 {% endblock %}
