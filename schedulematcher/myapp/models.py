@@ -23,6 +23,7 @@ class Schedule(models.Model):
 
 class User(AbstractUser):
     schedule=models.ForeignKey(Schedule,on_delete=models.CASCADE,null=True)
+    pdfFile = models.FileField(upload_to='pdfs/', null=True, blank=True)
 
 class Team(models.Model):
     members=models.ManyToManyField(User)
