@@ -1,6 +1,7 @@
 # CommonTime
-![image](schedulematcher/myapp/static/logooo.jpg)
 A schedule matcher for Cégep students to find common availabilities with their friends.
+
+<img src="schedulematcher/myapp/static/logooo.jpg" width="450">
 
 ## Features
 
