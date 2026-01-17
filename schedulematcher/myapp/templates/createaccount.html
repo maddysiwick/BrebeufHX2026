@@ -2,7 +2,25 @@
 {% load static %}
 {% block content %}
 
+<!-- <script>
+    (function() {
+    $('form > input').keyup(function() {
 
+        var empty = false;
+        $('form > input').each(function() {
+            if ($(this).val() == '') {
+                empty = true;
+            }
+        });
+
+        if (empty) {
+            $('#register').attr('disabled', 'disabled');
+        } else {
+            $('#register').removeAttr('disabled'); 
+        }
+    });
+})()
+</script> -->
 <main class="container-fluid d-flex justify-content-center align-items-center bg-image">
     <!-- Single Centered Box -->
     <div class="border rounded p-5 shadow" style="width: 600px; background-color: white;">
@@ -36,7 +54,7 @@
                     <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" class="choosefilebutton">
 
 
-                    <input type="submit" value="Create Account" style="margin-top: 30px;" class="loginbutton">
+                    <input type="submit" id="register" value="Create Account" style="margin-top: 30px;" class="loginbutton">
                 </form>
 
 {% endblock %}
