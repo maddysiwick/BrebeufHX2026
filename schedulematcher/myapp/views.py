@@ -97,6 +97,19 @@ def findVacantPlage(schedules, blockSize, earliest=480, latest=1200):
         for i in range(len(days)):
             for block in days[i].block_set.all():
                 blocks[i].append((block.startTime,block.endTime))
+    plage=findScheduleOverlap(blockSize,blocks)
+    if plage==[[],[],[],[],[],[],[]]:
+        blocks=[[],[],[],[],[],[],[]]
+        for schedule in schedules:
+            days=[schedule.monday,schedule.tuesday,schedule.wednesday,schedule.thursday,schedule.friday,schedule.saturday,schedule.sunday]
+            for i in range(len(days)):
+                for block in days[i].block_set.all():
+                    if block.mandatory:
+                        blocks[i].append((block.startTime,block.endTime))
+        plage=findScheduleOverlap(blockSize,blocks)
+    return plage
+            
+def findScheduleOverlap(blockSize,blocks, earliest=480, latest=1200):
     plage=[[],[],[],[],[],[],[]]
     candidates=[[],[],[],[],[],[],[]]
 
@@ -127,8 +140,6 @@ def findVacantPlage(schedules, blockSize, earliest=480, latest=1200):
             if clear:
                 candidates[k].append([i,i+blockSize])
     return plage
-            
-
 
 def creategroup(request):
     return render(request, "creategroup.html")
