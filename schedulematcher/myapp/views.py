@@ -2,7 +2,6 @@ from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from myapp.parser.parser import OmnivoxScheduleParser
 from myapp.models import Block, Day,Schedule,Team,User,Request
 from django.core.files.storage import default_storage
 import math
