@@ -46,10 +46,10 @@
         <div id="emailList" class="h-100 border rounded d-flex flex-column p-4 justify-content-center px-5" style="gap: 20px; overflow-y: auto;">
           <!-- Empty State-->
         </div>
-        <a href="{% url 'creategroup' %}" class="btn custom-creategroup mt-auto w-100 d-flex align-items-center justify-content-center" style="gap: 10px;">
+        <button class="btn custom-creategroup mt-auto w-100 d-flex align-items-center justify-content-center" style="gap: 10px;" id="createGroup">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
             Create Group
-        </a>
+        </button>
       </div>
     </div>
 
@@ -59,15 +59,17 @@
     const emailInput = document.getElementById('email');
     const emailList = document.getElementById('emailList');
     const addButton = document.getElementById('addButton'); // your add button
+    const createGroup = document.getElementById('createGroup');
     
+    const savedEmails = [];
+
     function handleAdd() {
         const email = emailInput.value.trim();
         if (email) {
+            savedEmails.push(email);
+
             const emailTag = document.createElement('div');
             emailTag.className = 'd-flex justify-content-between border rounded px-2 py-1 bg-light';
-
-
-
     
             const emailText = document.createElement('span');
             emailText.textContent = email;
@@ -82,6 +84,11 @@
     
             removeBtn.addEventListener('click', () => {
                 emailList.removeChild(emailTag);
+                const index = savedEmails.indexOf(email);
+                
+                if (index > -1) {
+                  savedEmails.splice(index, 1);
+                }
             });
     
             emailTag.appendChild(emailText);
@@ -101,6 +108,31 @@
     });
     
     addButton.addEventListener('click', handleAdd);
+
+    async function CreateGroup() {
+      if (savedEmails.length <= 0) {
+        return;
+      }
+
+      const injectedCRSFToken = `{% csrf_token %}`;
+      const tokenRegex = /value="([^"]+)"/;
+      const token = injectedCRSFToken.match(tokenRegex)[0];
+
+      const response = await fetch("{% url 'creategroup' %}", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "csrfmiddlewaretoken": token,
+        },
+        body: JSON.stringify(savedEmails)
+      })
+
+      console.log(response.body);
+    }
+
+    createGroup.addEventListener('click', () => {
+      CreateGroup();
+    })
     </script>
     
       </div>

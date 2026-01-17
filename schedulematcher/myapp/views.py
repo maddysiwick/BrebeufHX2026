@@ -23,7 +23,7 @@ def welcomepage(request):
 def home(request):
     events = []
     if request.method == "POST":
-        print("made it into block")
+        
         try:
             username = request.POST["username"]
             password = request.POST["password"]
@@ -130,6 +130,11 @@ def findVacantPlage(schedules, blockSize, earliest=480, latest=1200):
 
 
 def creategroup(request):
+    if request.method == "POST":
+        print(request)
+        # User.objects.get()
+    
+
     return render(request, "creategroup.html")
 
 def match(request):
