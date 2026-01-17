@@ -14,9 +14,14 @@ def welcomepage(request):
 def home(request):
     events = []
     if request.method == "POST":
-        pdf = request.FILES['pdfFile']
+        try:
+            pdf = request.FILES['pdfFile']
+        except:
+            print("No pdf")
+            return render(request, 'home.html', {'events': events})
+           
+
         schedule = convert(pdf) # List of 5 lists each containing blocks
-        default_storage.save(pdf.name, pdf)
         
         weekday_map = {0: 0, 1: 1, 2: 2, 3: 3, 4: 4} 
         start_date = datetime(2026, 1, 5)
