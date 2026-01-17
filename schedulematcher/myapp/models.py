@@ -1,11 +1,9 @@
 from django.db import models
-from django.contrib.auth import AbstractUser
+from django.contrib.auth.models import AbstractUser
 
-class User(AbstractUser):
-    pass
 
 class Day(models.Model):
-    pass
+    name=models.CharField(max_length=100)
 
 class Block(models.Model):
     name = models.CharField(max_length=100)
@@ -15,13 +13,13 @@ class Block(models.Model):
     mandatory = models.BooleanField()
 
 class Schedule(models.Model):
-    monday=models.ForeignKey(Day)
-    tuesday=models.ForeignKey(Day)
-    wednesday=models.ForeignKey(Day)
-    thursday=models.ForeignKey(Day)
-    friday=models.ForeignKey(Day)
-    saturday=models.ForeignKey(Day)
-    sunday=models.ForeignKey(Day)
+    monday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="monday")
+    tuesday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="tuesday")
+    wednesday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="wednesday")
+    thursday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="thursday")
+    friday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="friday")
+    saturday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="saturday")
+    sunday=models.ForeignKey(Day,on_delete=models.CASCADE,related_name="sunday")
 
 
 
