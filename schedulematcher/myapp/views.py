@@ -16,6 +16,7 @@ from django.http import JsonResponse
 def welcomepage(request):
     if request.user.is_authenticated:
         return redirect("home")
+    
     if request.method == "POST":
         pass
     else:
@@ -24,6 +25,8 @@ def welcomepage(request):
 
 def home(request):
     events = []
+    if request.user.is_authenticated:
+        return redirect("home")
     
     if request.method == "POST":
         try:
@@ -73,8 +76,7 @@ def createaccount(request):
             user.schedule = schedule_obj
             user.save()
             
-            events = generateVisualSchedule(block_lists)
-            return render(request, 'home.html', {'events': events})
+            return redirect("home")
         
         
     else:
