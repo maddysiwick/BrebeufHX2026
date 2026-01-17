@@ -7,10 +7,6 @@ A schedule matcher for Cégep students to find common availabilities with their 
 - Add friends to your group
 - Create groups to find common availabilities
 
-Please watch the instructional video below showing how to export your course schedule as a PDF.
-
-[youtube url]
-
 > This is a project created for the BrébeufHx 9.0 hackathon.
 
 ---

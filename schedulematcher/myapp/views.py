@@ -143,7 +143,7 @@ def creategroup(request):
         for member in members:
             receptor = User.objects.get(username=member)
             teamInviteRequest = TeamRequest(message="", sender=team, receptor=receptor)
-            # resolveRequest(teamInviteRequest)
+            resolveRequest(teamInviteRequest)
         
         return JsonResponse({"success": True, "team_id": team.id})
     
