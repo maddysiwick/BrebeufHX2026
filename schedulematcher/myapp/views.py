@@ -1,6 +1,6 @@
 from django.shortcuts import render, HttpResponse
 from myapp.parser.parser import OmnivoxScheduleParser
-from myapp.models import Block, Day,Schedule,Team,User
+from myapp.models import Block, Day,Schedule,Team,User,Request
 from django.core.files.storage import default_storage
 import os
 import math
@@ -130,9 +130,11 @@ def intToTime(time):
     return str(hour).zfill(2) + ":" + str(minutes).zfill(2)
 
 def dummy(request):
-    group1=Team.objects.get(pk=1)
+    group2=Team.objects.create(name="french project")
+    group2.members.add(User.objects.get(pk=1))
+    request1=Request.objects.create(message="you have been invited to join a new group",receptor=request.user,sender=group2)
     schedules=[]
-    for member in group1.members.all():
+    for member in group2.members.all():
         schedules.append(member.schedule)
     results=findVacantPlage(schedules,120)
     return render (request,"dummy.html",{"vacantPlages":results})
@@ -184,3 +186,9 @@ def creategroup(request):
 
 def match(request):
     return render(request, "match.html")
+
+def resolveRequest(teamRequest):
+    team=teamRequest.sender
+    user=teamRequest.receptor
+    team.members.add(user)
+    Request.objects.delete(teamRequest)
