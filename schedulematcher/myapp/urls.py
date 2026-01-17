@@ -7,6 +7,7 @@ from .views import toggle_mandatory
 urlpatterns = [
     path("", views.welcomepage, name="welcomepage"),
     path("home/", views.home, name="home"),
+    path('groups/<int:id>/', views.groupDetail, name='group_detail'),
     path("dummy/",views.dummy,name="dummy"),
     path("createaccount/", views.createaccount, name="createaccount"),
     path("login/", views.createaccount, name="login"),

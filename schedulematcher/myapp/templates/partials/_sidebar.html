@@ -1,0 +1,48 @@
+<!-- Groups Sidebar -->
+<div class="col-3 d-none d-md-block pr-md-3 pr-0" id="groupsSidebar">
+    <div class="h-100 p-4 border rounded d-flex flex-column" style="gap: 10px;">
+        
+        {% if teams %}
+            <!-- Render actual groups -->
+            {% for team in teams %}
+                <a href="{% url 'group_detail' team.id %}" style="text-decoration: none; color: inherit;">
+                    <div class="d-flex flex-row align-items-center justify-content-start border rounded p-3 group-card" 
+                        style="gap: 10px; position: relative; cursor: pointer;{% if currentTeam and team.id == currentTeam.id %} background-color: #e9ecef;{% endif %}" 
+                        data-team-id="{{ team.id }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon lucide-users-round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+                        
+                        <p style="margin-bottom: 0; line-height: 1;">
+                            {{ team.name }} <br />
+                            <span style="font-size: 12px;" class="text-muted">
+                                {% for member in team.members.all %}{{ member.username }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                            </span>
+                        </p>
+
+                        <button style="position: absolute; right: 15px; border: none; background-color: transparent; padding-inline: 0;" class="groupSettings" data-team-id="{{ team.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                        </button>
+                    </div>
+                </a>
+            {% endfor %}
+        {% else %}
+            <!-- Empty State -->
+            <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                <div class="mb-2 bg-light p-2 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon lucide-users-round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+                </div>
+
+                <p class="text-center mb-3">
+                    No groups yet <br />
+                    <span class="text-muted">Create a new group</span>
+                </p>
+            </div>
+        {% endif %}
+
+        <!-- Create Group Button -->
+        <a href="{% url 'creategroup' %}" class="btn custom-creategroup mt-auto w-100 d-flex align-items-center justify-content-center" style="gap: 10px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Create Group
+        </a>
+        
+    </div>
+</div>

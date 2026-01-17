@@ -1,11 +1,6 @@
-{% extends "base.html" %} {% block title %} Home Page {% endblock %} 
+{% extends "base.html" %} {% block title %} Groups {% endblock %} 
 
 {% block content %}
-
-{% comment %}
-The Icons are from [Lucide](https://lucide.dev/)
-Added lots of comments to make it easier to find where everything is
-{% endcomment %}
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@event-calendar/build@5.2.3/dist/event-calendar.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@event-calendar/build@5.2.3/dist/event-calendar.min.js"></script>
@@ -21,22 +16,18 @@ Added lots of comments to make it easier to find where everything is
                 <div class="d-flex align-items-center px-4 border-bottom" style="height: 60px; min-height: 60px;">
                     <h5 class="mb-0">{{user.username}}</h5>
 
-
                     <div style="position: absolute; right: 15px;">
-                        <a href="/logout/">
-                        <button class="btn btn-outline-secondary p-2" id="exitbutton" onclick="">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-door-open-icon lucide-door-open"><path d="M11 20H2"/><path d="M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z"/><path d="M11 4H8a2 2 0 0 0-2 2v14"/><path d="M14 12h.01"/><path d="M22 20h-3"/></svg>
-                        </button>
-                        </a>
                         <button class="btn btn-outline-secondary p-2" id="plusbutton">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                         </button>
                         <button class="btn btn-outline-secondary p-2" id="notificationsButton">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell-icon lucide-bell"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
                         </button>
-                        <button class="btn btn-outline-secondary p-2" id="homebutton">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-                        </button>
+                        <a href="{% url 'home' %}">
+                            <button class="btn btn-outline-secondary p-2" id="homebutton">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                            </button>
+                        </a>
                         
                     </div>
                 </div>

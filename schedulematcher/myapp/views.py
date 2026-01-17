@@ -59,6 +59,20 @@ def home(request):
 
     return render(request, 'home.html', {'events': events, 'user': request.user, 'teams': user_teams})
 
+# terrible implementation cuz its just regular counter but no time to make it a uuid
+def groupDetail(request, id):
+    team = Team.objects.get(id=id)
+
+    if not request.user.is_authenticated:
+        return redirect("welcomepage")
+
+    if request.user not in team.members.all():
+        return redirect("home")
+
+    user_teams = Team.objects.filter(members=request.user)
+
+    return render(request, 'groups.html', {'currentTeam': team, 'teams': user_teams})
+
 def createaccount(request):
     events = []
 
