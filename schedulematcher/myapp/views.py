@@ -8,5 +8,5 @@ def welcomepage(request):
 def home(request):
     return render(request, 'home.html')
 
-def home(request):
+def createaccount(request):
     return render(request, "createaccount.html")
