@@ -1,252 +1,112 @@
-{% extends "base.html" %} {% block title %} Groups {% endblock %} 
+{% extends "partials/_layout.html" %} 
 
-{% block content %}
+{% block title %}Groups{% endblock %} 
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@event-calendar/build@5.2.3/dist/event-calendar.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@event-calendar/build@5.2.3/dist/event-calendar.min.js"></script>
- 
-<main class="container-fluid" style="height: 100vh; padding: 15px;">
-    <div class="row h-100 no-gutters">
-        {% include "partials/_sidebar.html" %}
+{% block page_title %}{{currentTeam.name}} - {{user.username}}{% endblock %}
 
-        <!-- Main Content -->
-        <div class="col-md-9 col-12" id="mainContent">
-            <div class="h-100 border rounded d-flex flex-column bg-white" style="overflow: hidden;">
-                <!-- Header Section -->
-                <div class="d-flex align-items-center px-4 border-bottom" style="height: 60px; min-height: 60px;">
-                    <h5 class="mb-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon lucide-users-round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
-                        {{currentTeam.name}} - {{user.username}}
-                    </h5>
+{% block header_icon %}
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users-round-icon lucide-users-round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>
+{% endblock %}
 
-                    <div style="position: absolute; right: 15px;">
-                        <button class="btn btn-outline-secondary p-2" id="findCommonTimeButton">
-                            Find Common Time <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search-icon lucide-search"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
-                        </button>
-                        <a href="{% url 'home' %}">
-                            <button class="btn btn-outline-secondary p-2" id="homebutton">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-                            </button>
-                        </a>
-                        
-                    </div>
-                </div>
-                
-                <!-- Calendar Section -->
-                <div class="flex-grow-1 p-4" style="overflow: hidden;">
-                    <div id="calendar" style="height: calc(100% - 35px);"></div>
-                    {{ events|json_script:"events-data" }}
+{% block header_buttons %}
+<button class="btn btn-outline-secondary p-2" id="findCommonTimeButton">
+    Find Common Time <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search-icon lucide-search"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+</button>
+<a href="{% url 'home' %}">
+    <button class="btn btn-outline-secondary p-2" id="homebutton">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+    </button>
+</a>
+{% endblock %}
 
-                    <div class="d-flex align-items-center" style="height: 35px; min-height: 35px; width: 100%; gap: 15px; flex-wrap: wrap;">
-                        <!-- Current user -->
-                        <div class="d-flex align-items-center" style="gap: 6px;">
-                            <div style="width: 12px; height: 12px; border-radius: 50%; background-color: #007EA7;"></div>
-                            <span style="font-size: 13px;">{{ user.username }} (You)</span>
-                        </div>
-                        <!-- Other team members -->
-                        {% for username, color in ColorMapping.items %}
-                            <div class="d-flex align-items-center" style="gap: 6px;">
-                                <div style="width: 12px; height: 12px; border-radius: 50%; background-color: {{ color }};"></div>
-                                <span style="font-size: 13px;">{{ username }}</span>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+{% block calendar_content %}
+<div id="calendar" style="height: calc(100% - 35px);"></div>
+{{ events|json_script:"events-data" }}
+
+<div class="d-flex align-items-center" style="height: 35px; min-height: 35px; width: 100%; gap: 15px; flex-wrap: wrap;">
+    <!-- Current user -->
+    <div class="d-flex align-items-center" style="gap: 6px;">
+        <div style="width: 12px; height: 12px; border-radius: 50%; background-color: #007EA7;"></div>
+        <span style="font-size: 13px;">{{ user.username }} (You)</span>
+    </div>
+    <!-- Other team members -->
+    {% for username, color in ColorMapping.items %}
+        <div class="d-flex align-items-center" style="gap: 6px;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background-color: {{ color }};"></div>
+            <span style="font-size: 13px;">{{ username }}</span>
         </div>
+    {% endfor %}
+</div>
+{% endblock %}
 
-        <!-- Bottom Navigation Bar for mobile (unfinished) -->
-        <div class="fixed-bottom bg-white border-top d-md-none" style="height: 75px;">
-            <div class="d-flex align-items-center h-100 px-4" style="gap: 15px;">
-                <button class="btn btn-outline-secondary w-100" id="groupsButton">Groups</button>
-                <button class="btn btn-outline-secondary w-100" id="scheduleButton">Schedule</button>
-            </div>
-        </div>
-        
+{% block modals %}
+<!-- Find Common Time Modal -->
+<div id="findCommonTimeModal" style="
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.4);
+z-index: 2000;
+align-items: center;
+justify-content: center;
+">
+<div style="background: white; padding: 20px; border-radius: 8px; width: 350px; max-height: 80vh; overflow-y: auto;">
+    <h5>Find Common Time</h5>
+    <p class="text-muted" style="font-size: 13px;">Find available time slots when all team members are free.</p>
+
+    <label class="mt-2">Duration (minutes)</label>
+    <input id="durationInput" class="form-control mb-3" type="number" value="60" min="15" step="15">
+
+    <button class="btn btn-primary w-100 mb-3" id="searchAvailabilityBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search me-1"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        Search Available Times
+    </button>
+
+    <div id="availabilityResults" style="display: none;">
+        <h6>Available Slots</h6>
+        <div id="slotsList" style="max-height: 200px; overflow-y: auto;"></div>
     </div>
 
-        
-    <div id="findCommonTimeModal" style="
+    <div class="d-flex justify-content-end mt-3" style="gap: 5px;">
+        <button class="btn btn-secondary btn-sm" id="closeFindCommonTimeModal">Close</button>
+    </div>
+</div>
+</div>
+
+<!-- Event Check Modal -->
+<div id="eventCheckModal" style="
     display: none;
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.4);
-    z-index: 2000;
+    z-index: 3000;
     align-items: center;
     justify-content: center;
     ">
-    <div style="background: white; padding: 20px; border-radius: 8px; width: 350px; max-height: 80vh; overflow-y: auto;">
-        <h5>Find Common Time</h5>
-        <p class="text-muted" style="font-size: 13px;">Find available time slots when all team members are free.</p>
+    <div style="background: white; padding: 20px; border-radius: 8px; width: 300px;">
+        <h5 id="clickedEventTitle"></h5>
 
-        <label class="mt-2">Duration (minutes)</label>
-        <input id="durationInput" class="form-control mb-3" type="number" value="60" min="15" step="15">
+        <div class="form-check my-3">
+        <input class="form-check-input" type="checkbox" id="eventChecked">
+        <label class="form-check-label">
+            Mark as selected
+        </label>
+        </div>
 
-        <button class="btn btn-primary w-100 mb-3" id="searchAvailabilityBtn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search me-1"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
-            Search Available Times
+        <div class="d-flex justify-content-end gap-2">
+        <button class="btn btn-secondary btn-sm" id="closeEventCheck">
+            Close
         </button>
-
-        <div id="availabilityResults" style="display: none;">
-            <h6>Available Slots</h6>
-            <div id="slotsList" style="max-height: 200px; overflow-y: auto;"></div>
-        </div>
-
-        <div class="d-flex justify-content-end mt-3" style="gap: 5px;">
-            <button class="btn btn-secondary btn-sm" id="closeFindCommonTimeModal">Close</button>
         </div>
     </div>
-    </div>
-    <div id="eventCheckModal" style="
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.4);
-        z-index: 3000;
-        align-items: center;
-        justify-content: center;
-        ">
-        <div style="background: white; padding: 20px; border-radius: 8px; width: 300px;">
-            <h5 id="clickedEventTitle"></h5>
+</div>
 
-            <div class="form-check my-3">
-            <input class="form-check-input" type="checkbox" id="eventChecked">
-            <label class="form-check-label">
-                Mark as selected
-            </label>
-            </div>
-
-            <div class="d-flex justify-content-end gap-2">
-            <button class="btn btn-secondary btn-sm" id="closeEventCheck">
-                Close
-            </button>
-            </div>
-        </div>
-        </div>
+{% endblock %}
 
 
-</main>
-
-
+{% block scripts %}
 <script>
-    // Setup Mobile View
-    const urlParams = new URLSearchParams(window.location.search);
-    let MobileViewState = urlParams.get('page') || "schedule";
-
-    const groupsSidebar = document.getElementById("groupsSidebar");
-    const mainContent = document.getElementById("mainContent");
-
-    const groupsButton = document.getElementById("groupsButton");
-    const scheduleButton = document.getElementById("scheduleButton");
-    
-    // Helper
-    function isMobile() {
-        return window.innerWidth < 768;
-    }
-
-    function setMobileView() {
-        if (isMobile()) {
-            mainContent.style.height = "calc(100% - 75px)";
-            groupsSidebar.style.height = "calc(100% - 75px)";
-        } else {
-            mainContent.style.height = "100%";
-            groupsSidebar.style.height = "100%";
-        }
-    }
-
-    function updateURL(page) {
-        const url = new URL(window.location);
-        url.searchParams.set('page', page);
-        history.replaceState({}, '', url);
-    }
-
-    // Main Functions
-    function showGroups() {
-        if (!isMobile()) {
-            return;
-        }
-        MobileViewState = "groups";
-        updateURL("groups");
-        setMobileView();
-        
-        groupsSidebar.classList.remove('d-none');
-        mainContent.classList.add('d-none');
-        
-        groupsSidebar.classList.add('col-12');
-        groupsSidebar.classList.remove('col-3');
-
-        groupsButton.classList.add('active');
-        scheduleButton.classList.remove('active');
-    }
-
-    function showSchedule() {
-        if (!isMobile()) {
-            return;
-        }
-        MobileViewState = "schedule";
-        updateURL("schedule");
-        setMobileView();
-
-        groupsSidebar.classList.add('d-none');
-        mainContent.classList.remove('d-none');
-
-        groupsSidebar.classList.add('col-3');
-        groupsSidebar.classList.remove('col-12');
-
-        groupsButton.classList.remove('active');
-        scheduleButton.classList.add('active');
-    }
-
-    // Main
-    function HandleView() {
-        setMobileView();
-        
-        if (!isMobile()) {
-            groupsSidebar.classList.remove('d-none');
-            mainContent.classList.remove('d-none');
-
-            groupsSidebar.classList.add('col-3');
-            groupsSidebar.classList.remove('col-12');
-            
-            groupsSidebar.classList.remove('bg-white');
-        } else {
-            groupsSidebar.classList.add('bg-white');
-            
-            if (MobileViewState == "groups") {
-                showGroups();
-            } else {
-                showSchedule();
-            }
-        }
-    }
-    
-    // Event Listeners
-    groupsButton.addEventListener("click", showGroups);
-    scheduleButton.addEventListener("click", showSchedule);
-    window.addEventListener('resize', HandleView);
-
-    // Initial View
-    HandleView();
-
     // Calendar Setup
-    // https://github.com/vkurko/calendar
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    
     const events = JSON.parse(document.getElementById('events-data').textContent);
     let ec = EventCalendar.create(document.getElementById('calendar'), {
         view: 'timeGridWeek',
@@ -319,16 +179,35 @@
                 availabilityResults.style.display = 'block';
                 slotsList.innerHTML = '';
 
+                // Sort recommended slots to the top
+                data.events.sort((a, b) => (b.isRecommended ? 1 : 0) - (a.isRecommended ? 1 : 0));
+
                 data.events.forEach((slot, index) => {
                     const slotDiv = document.createElement('div');
-                    slotDiv.className = 'd-flex justify-content-between align-items-center p-2 border rounded mb-2';
+                    slotDiv.className = `d-flex justify-content-between align-items-center p-3 border rounded mb-2 ${slot.isRecommended ? 'border-warning shadow-sm' : ''}`;
+                    slotDiv.style.position = 'relative';
+
+                    if (slot.isRecommended) {
+                        slotDiv.style.borderWidth = '2px';
+                        slotDiv.style.backgroundColor = 'rgba(255, 193, 7, 0.04)';
+                    }
+                    
                     slotDiv.innerHTML = `
-                        <div>
-                            <p>${slot.dayName}<br>
-                                <small class="text-muted">${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}</small>
-                            </p>
+                        ${slot.isRecommended ? `
+                            <div style="position: absolute; top: 0px; right: 0px; color: #ffc107;" title="Recommended Time">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star"><path d="M11.525 2.223a1.077 1.077 0 0 1 1.95 0l2.338 4.738 5.23.76a1.077 1.077 0 0 1 .597 1.837l-3.784 3.688.893 5.209a1.077 1.077 0 0 1-1.562 1.135l-4.687-2.464-4.687 2.464a1.077 1.077 0 0 1-1.562-1.135l.893-5.209-3.784-3.688a1.077 1.077 0 0 1 .597-1.837l5.23-.76z"/></svg> 
+                            </div>
+                        ` : ''}
+                        <div class="d-flex align-items-center">
+                            <div style="padding-right: 30px;">
+                                ${slot.isRecommended ? '<small class="text-warning fw-bold mb-1 d-block" style="font-size: 10px; letter-spacing: 0.5px;">RECOMMENDED</small>' : ''}
+                                <h6 class="mb-1" style="font-weight: 600;">${slot.dayName}</h6>
+                                <p class="mb-0 text-muted" style="font-size: 14px;">
+                                    ${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}
+                                </p>
+                            </div>
                         </div>
-                        <button class="btn btn-sm btn-success add-slot-btn" data-index="${index}">
+                        <button class="btn btn-sm btn-success add-slot-btn px-4 py-2" data-index="${index}" style="font-weight: 600; z-index: 1;">
                             Add
                         </button>
                     `;
@@ -386,8 +265,5 @@
             alert('Failed to save event: ' + error.message);
         });
     }
-
 </script>
-
-
 {% endblock %}

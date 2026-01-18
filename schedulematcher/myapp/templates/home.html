@@ -1,305 +1,176 @@
-{% extends "base.html" %} {% block title %} Home Page {% endblock %} 
+{% extends "partials/_layout.html" %} 
 
-{% block content %}
+{% block title %}Home Page{% endblock %} 
 
-{% comment %}
-The Icons are from [Lucide](https://lucide.dev/)
-Added lots of comments to make it easier to find where everything is
-{% endcomment %}
+{% block page_title %}{{user.username}}'s Schedule{% endblock %}
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@event-calendar/build@5.2.3/dist/event-calendar.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@event-calendar/build@5.2.3/dist/event-calendar.min.js"></script>
- 
-<main class="container-fluid" style="height: 100vh; padding: 15px;">
-    <div class="row h-100 no-gutters">
-        {% include "partials/_sidebar.html" %}
+{% block header_icon %}
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-check2-icon lucide-calendar-check-2"><path d="M8 2v4"/><path d="M16 2v4"/><path d="M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18"/><path d="m16 20 2 2 4-4"/></svg>
+{% endblock %}
 
-        <!-- Main Content -->
-        <div class="col-md-9 col-12" id="mainContent">
-            <div class="h-100 border rounded d-flex flex-column bg-white" style="overflow: hidden;">
-                <!-- Header Section -->
-                <div class="d-flex align-items-center px-4 border-bottom" style="height: 60px; min-height: 60px;">
-                    <h5 class="mb-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-check2-icon lucide-calendar-check-2"><path d="M8 2v4"/><path d="M16 2v4"/><path d="M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18"/><path d="m16 20 2 2 4-4"/></svg>
-                        {{user.username}}'s Schedule
-                    </h5>
+{% block header_buttons %}
+<button class="btn btn-outline-secondary p-2" id="plusbutton">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+</button>
+{% endblock %}
 
+{% block calendar_content %}
+<div id="calendar" style="height: 100%;"></div>
+{{ events|json_script:"events-data" }}
+{% endblock %}
 
-                    <div style="position: absolute; right: 15px;">
-                        <a href="/logout/">
-                        <button class="btn btn-outline-secondary p-2" id="exitbutton" onclick="">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-door-open-icon lucide-door-open"><path d="M11 20H2"/><path d="M11 4.562v16.157a1 1 0 0 0 1.242.97L19 20V5.562a2 2 0 0 0-1.515-1.94l-4-1A2 2 0 0 0 11 4.561z"/><path d="M11 4H8a2 2 0 0 0-2 2v14"/><path d="M14 12h.01"/><path d="M22 20h-3"/></svg>
-                        </button>
-                        </a>
-                        <button class="btn btn-outline-secondary p-2" id="plusbutton">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                        </button>
-                        <button class="btn btn-outline-secondary p-2" id="homebutton">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house-icon lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-                        </button>
-                        
-                    </div>
-                </div>
-                
-                <!-- Calendar Section -->
-                <div class="flex-grow-1 p-4" style="overflow: hidden;">
-                    <div id="calendar" style="height: 100%;"></div>
-                    {{ events|json_script:"events-data" }}
-                </div>
+{% block modals %}
+<!-- Add Event Modal -->
+<div id="addEventModal" style="
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.4);
+z-index: 2000;
+align-items: center;
+justify-content: center;
+">
+<div style="background: white; padding: 20px; border-radius: 8px; width: 320px;">
+    <h5>Add Event</h5>
+
+    <label class="mt-2">Title</label>
+    <input id="eventTitle" class="form-control mb-2" type="text">
+
+    <label>Recurrence</label>
+    <select id="eventRecurrence" class="form-control mb-2">
+        <option value="weekly">Weekly (repeats every week)</option>
+        <option value="once">One-time only</option>
+        <option value="repeat">Repeat for specific weeks</option>
+    </select>
+
+    <!-- For weekly/repeat: show day dropdown + time inputs -->
+    <div id="recurringInputs">
+        <label>Day</label>
+        <select id="eventDay" class="form-control mb-2">
+            <option value="0">Monday</option>
+            <option value="1">Tuesday</option>
+            <option value="2">Wednesday</option>
+            <option value="3">Thursday</option>
+            <option value="4">Friday</option>
+            <option value="5">Saturday</option>
+            <option value="6">Sunday</option>
+        </select>
+
+        <div class="d-flex" style="gap: 10px;">
+            <div class="flex-fill">
+                <label>Start Time</label>
+                <input id="eventStartTime" class="form-control mb-2" type="time" value="09:00">
+            </div>
+            <div class="flex-fill">
+                <label>End Time</label>
+                <input id="eventEndTime" class="form-control mb-2" type="time" value="10:00">
             </div>
         </div>
-
-        <!-- Bottom Navigation Bar for mobile (unfinished) -->
-        <div class="fixed-bottom bg-white border-top d-md-none" style="height: 75px;">
-            <div class="d-flex align-items-center h-100 px-4" style="gap: 15px;">
-                <button class="btn btn-outline-secondary w-100" id="groupsButton">Groups</button>
-                <button class="btn btn-outline-secondary w-100" id="scheduleButton">Schedule</button>
-            </div>
-        </div>
-        
     </div>
 
-        
-    <div id="addEventModal" style="
+    <!-- For one-time: show full datetime inputs -->
+    <div id="oneTimeInputs" style="display: none;">
+        <label>Start</label>
+        <input id="eventStart" class="form-control mb-2" type="datetime-local">
+
+        <label>End</label>
+        <input id="eventEnd" class="form-control mb-2" type="datetime-local">
+    </div>
+
+    <div id="repeatCountContainer" style="display: none;">
+        <label>Number of weeks</label>
+        <input id="eventRepeatCount" class="form-control mb-2" type="number" min="1" value="2">
+    </div>
+
+    <div class="d-flex justify-content-end mt-3" style="gap: 5px;">
+        <button class="btn btn-secondary btn-sm" id="cancelEvent">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="saveEvent">Add</button>
+    </div>
+</div>
+</div>
+
+<!-- Event Check Modal -->
+<div id="eventCheckModal" style="
     display: none;
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.4);
-    z-index: 2000;
+    z-index: 3000;
     align-items: center;
     justify-content: center;
     ">
-    <div style="background: white; padding: 20px; border-radius: 8px; width: 320px;">
-        <h5>Add Event</h5>
+    <div style="background: white; padding: 20px; border-radius: 8px; width: 300px;">
+        <h5 id="clickedEventTitle"></h5>
 
-        <label class="mt-2">Title</label>
-        <input id="eventTitle" class="form-control mb-2" type="text">
-
-        <label>Recurrence</label>
-        <select id="eventRecurrence" class="form-control mb-2">
-            <option value="weekly">Weekly (repeats every week)</option>
-            <option value="once">One-time only</option>
-            <option value="repeat">Repeat for specific weeks</option>
-        </select>
-
-        <!-- For weekly/repeat: show day dropdown + time inputs -->
-        <div id="recurringInputs">
-            <label>Day</label>
-            <select id="eventDay" class="form-control mb-2">
-                <option value="0">Monday</option>
-                <option value="1">Tuesday</option>
-                <option value="2">Wednesday</option>
-                <option value="3">Thursday</option>
-                <option value="4">Friday</option>
-                <option value="5">Saturday</option>
-                <option value="6">Sunday</option>
-            </select>
-
-            <div class="d-flex" style="gap: 10px;">
-                <div class="flex-fill">
-                    <label>Start Time</label>
-                    <input id="eventStartTime" class="form-control mb-2" type="time" value="09:00">
-                </div>
-                <div class="flex-fill">
-                    <label>End Time</label>
-                    <input id="eventEndTime" class="form-control mb-2" type="time" value="10:00">
-                </div>
-            </div>
+        <div class="form-check my-3">
+        <input class="form-check-input" type="checkbox" id="eventChecked">
+        <label class="form-check-label">
+            Mark as selected
+        </label>
         </div>
 
-        <!-- For one-time: show full datetime inputs -->
-        <div id="oneTimeInputs" style="display: none;">
-            <label>Start</label>
-            <input id="eventStart" class="form-control mb-2" type="datetime-local">
-
-            <label>End</label>
-            <input id="eventEnd" class="form-control mb-2" type="datetime-local">
+        <div class="d-flex justify-content-end gap-2">
+        <button class="btn btn-secondary btn-sm" id="closeEventCheck">
+            Close
+        </button>
         </div>
+</div>
+</div>
+{% endblock %}
 
-        <div id="repeatCountContainer" style="display: none;">
-            <label>Number of weeks</label>
-            <input id="eventRepeatCount" class="form-control mb-2" type="number" min="1" value="2">
-        </div>
-
-        <div class="d-flex justify-content-end mt-3" style="gap: 5px;">
-            <button class="btn btn-secondary btn-sm" id="cancelEvent">Cancel</button>
-            <button class="btn btn-primary btn-sm" id="saveEvent">Add</button>
-        </div>
-    </div>
-    </div>
-    <div id="eventCheckModal" style="
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.4);
-        z-index: 3000;
-        align-items: center;
-        justify-content: center;
-        ">
-        <div style="background: white; padding: 20px; border-radius: 8px; width: 300px;">
-            <h5 id="clickedEventTitle"></h5>
-
-            <div class="form-check my-3">
-            <input class="form-check-input" type="checkbox" id="eventChecked">
-            <label class="form-check-label">
-                Mark as selected
-            </label>
-            </div>
-
-            <div class="d-flex justify-content-end gap-2">
-            <button class="btn btn-secondary btn-sm" id="closeEventCheck">
-                Close
-            </button>
-            </div>
-        </div>
-        </div>
-
-
-</main>
-
-
+{% block scripts %}
 <script>
-    // Setup Mobile View
-    const urlParams = new URLSearchParams(window.location.search);
-    let MobileViewState = urlParams.get('page') || "schedule";
-
-    const groupsSidebar = document.getElementById("groupsSidebar");
-    const mainContent = document.getElementById("mainContent");
-
-    const groupsButton = document.getElementById("groupsButton");
-    const scheduleButton = document.getElementById("scheduleButton");
-    
-    // Helper
-    function isMobile() {
-        return window.innerWidth < 768;
-    }
-
-    function setMobileView() {
-        if (isMobile()) {
-            mainContent.style.height = "calc(100% - 75px)";
-            groupsSidebar.style.height = "calc(100% - 75px)";
-        } else {
-            mainContent.style.height = "100%";
-            groupsSidebar.style.height = "100%";
-        }
-    }
-
-    function updateURL(page) {
-        const url = new URL(window.location);
-        url.searchParams.set('page', page);
-        history.replaceState({}, '', url);
-    }
-
-    // Main Functions
-    function showGroups() {
-        if (!isMobile()) {
-            return;
-        }
-        MobileViewState = "groups";
-        updateURL("groups");
-        setMobileView();
-        
-        groupsSidebar.classList.remove('d-none');
-        mainContent.classList.add('d-none');
-        
-        groupsSidebar.classList.add('col-12');
-        groupsSidebar.classList.remove('col-3');
-
-        groupsButton.classList.add('active');
-        scheduleButton.classList.remove('active');
-    }
-
-    function showSchedule() {
-        if (!isMobile()) {
-            return;
-        }
-        MobileViewState = "schedule";
-        updateURL("schedule");
-        setMobileView();
-
-        groupsSidebar.classList.add('d-none');
-        mainContent.classList.remove('d-none');
-
-        groupsSidebar.classList.add('col-3');
-        groupsSidebar.classList.remove('col-12');
-
-        groupsButton.classList.remove('active');
-        scheduleButton.classList.add('active');
-    }
-
-    // Main
-    function HandleView() {
-        setMobileView();
-        
-        if (!isMobile()) {
-            groupsSidebar.classList.remove('d-none');
-            mainContent.classList.remove('d-none');
-
-            groupsSidebar.classList.add('col-3');
-            groupsSidebar.classList.remove('col-12');
-            
-            groupsSidebar.classList.remove('bg-white');
-        } else {
-            groupsSidebar.classList.add('bg-white');
-            
-            if (MobileViewState == "groups") {
-                showGroups();
-            } else {
-                showSchedule();
-            }
-        }
-    }
-    
-    // Event Listeners
-    groupsButton.addEventListener("click", showGroups);
-    scheduleButton.addEventListener("click", showSchedule);
-    window.addEventListener('resize', HandleView);
-
-    // Initial View
-    HandleView();
-
     // Calendar Setup
-    // https://github.com/vkurko/calendar
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    
     const events = JSON.parse(document.getElementById('events-data').textContent);
     let ec = EventCalendar.create(document.getElementById('calendar'), {
         view: 'timeGridWeek',
         height: '100%',
         events: events,
+        selectable: true,
         editable: true,
         eventStartEditable: true,
         eventDurationEditable: true,
+        select: function(info) {
+            const modal = document.getElementById('addEventModal');
+            modal.style.display = 'flex';
+            
+            const startDate = info.start;
+            const endDate = info.end;
+            
+            const dayOfWeek = startDate.getDay();
+            const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            document.getElementById('eventDay').value = dayIndex;
+            
+            const formatTime = (date) => {
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                return `${hours}:${minutes}`;
+            };
+            
+            document.getElementById('eventStartTime').value = formatTime(startDate);
+            document.getElementById('eventEndTime').value = formatTime(endDate);
+            
+            const formatDateTimeLocal = (date) => {
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const day = date.getDate().toString().padStart(2, '0');
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            };
+            
+            document.getElementById('eventStart').value = formatDateTimeLocal(startDate);
+            document.getElementById('eventEnd').value = formatDateTimeLocal(endDate);
+        },
         eventDrop: function(info) {
-            const event = info.event;
-            const eventId = event.id;
+            const eventId = info.event.id;
+            const newStart = info.event.start;
+            const newEnd = info.event.end;
             
-            if (!eventId) {
-                alert("Cannot move this event (no ID)");
-                info.revert();
-                return;
-            }
-            
-            const newStart = event.start;
-            const jsDay = newStart.getDay();
-            const dayIndex = jsDay === 0 ? 6 : jsDay - 1;
+            const dayOfWeek = newStart.getDay();
+            const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
             const startTime = newStart.getHours() * 60 + newStart.getMinutes();
-            const endTime = event.end.getHours() * 60 + event.end.getMinutes();
+            const endTime = newEnd.getHours() * 60 + newEnd.getMinutes();
             
             fetch(`/update-event/${eventId}/`, {
                 method: "POST",
@@ -318,7 +189,7 @@ Added lots of comments to make it easier to find where everything is
                 if (data.success) {
                     window.location.reload();
                 } else {
-                    alert("Failed to update: " + (data.error || "Unknown error"));
+                    alert("Failed to update event");
                     info.revert();
                 }
             })
@@ -328,17 +199,12 @@ Added lots of comments to make it easier to find where everything is
             });
         },
         eventResize: function(info) {
-            const event = info.event;
-            const eventId = event.id;
+            const eventId = info.event.id;
+            const newStart = info.event.start;
+            const newEnd = info.event.end;
             
-            if (!eventId) {
-                alert("Cannot resize this event (no ID)");
-                info.revert();
-                return;
-            }
-            
-            const startTime = event.start.getHours() * 60 + event.start.getMinutes();
-            const endTime = event.end.getHours() * 60 + event.end.getMinutes();
+            const startTime = newStart.getHours() * 60 + newStart.getMinutes();
+            const endTime = newEnd.getHours() * 60 + newEnd.getMinutes();
             
             fetch(`/update-event/${eventId}/`, {
                 method: "POST",
@@ -356,7 +222,7 @@ Added lots of comments to make it easier to find where everything is
                 if (data.success) {
                     window.location.reload();
                 } else {
-                    alert("Failed to resize: " + (data.error || "Unknown error"));
+                    alert("Failed to resize event");
                     info.revert();
                 }
             })
@@ -365,53 +231,15 @@ Added lots of comments to make it easier to find where everything is
                 info.revert();
             });
         },
-        selectable: true,
-        select: function(info) {
-            const startDate = info.start;
-            const endDate = info.end;
-            
-            const jsDay = startDate.getDay();
-            const dayIndex = jsDay === 0 ? 6 : jsDay - 1;
-            
-            const formatTime = (dt) => {
-                const hours = String(dt.getHours()).padStart(2, '0');
-                const minutes = String(dt.getMinutes()).padStart(2, '0');
-                return `${hours}:${minutes}`;
-            };
-            
-            document.getElementById('eventDay').value = dayIndex;
-            document.getElementById('eventStartTime').value = formatTime(startDate);
-            document.getElementById('eventEndTime').value = formatTime(endDate);
-            
-            const formatDateTime = (dt) => {
-                const year = dt.getFullYear();
-                const month = String(dt.getMonth() + 1).padStart(2, '0');
-                const day = String(dt.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}T${formatTime(dt)}`;
-            };
-            document.getElementById('eventStart').value = formatDateTime(startDate);
-            document.getElementById('eventEnd').value = formatDateTime(endDate);
-            
-            document.getElementById('addEventModal').style.display = 'flex';
-            ec.unselect();
-        },
         eventDidMount: function(info) {
             info.el.addEventListener('contextmenu', function(e) {
                 e.preventDefault();
-                
                 const eventId = info.event.id;
-                const eventTitle = info.event.title;
                 
-                if (!eventId) {
-                    alert("This event cannot be deleted (no ID)");
-                    return;
-                }
-                
-                if (confirm(`Delete "${eventTitle}"?`)) {
+                if (confirm('Delete this event?')) {
                     fetch(`/delete-event/${eventId}/`, {
                         method: "POST",
                         headers: {
-                            "Content-Type": "application/json",
                             "X-CSRFToken": getCookie("csrftoken")
                         }
                     })
@@ -420,7 +248,7 @@ Added lots of comments to make it easier to find where everything is
                         if (data.success) {
                             window.location.reload();
                         } else {
-                            alert("Failed to delete: " + (data.error || "Unknown error"));
+                            alert("Failed to delete event: " + (data.error || "Unknown error"));
                         }
                     })
                     .catch(error => {
@@ -432,6 +260,7 @@ Added lots of comments to make it easier to find where everything is
         }
     });
 
+    // Add Event Modal
     const plusButton = document.getElementById('plusbutton');
     const modal = document.getElementById('addEventModal');
     const recurrenceSelect = document.getElementById('eventRecurrence');
@@ -453,20 +282,20 @@ Added lots of comments to make it easier to find where everything is
     }
 
     recurrenceSelect.addEventListener('change', updateInputVisibility);
+    updateInputVisibility();
 
     plusButton.addEventListener('click', () => {
         modal.style.display = 'flex';
     });
 
-    // Helper function to clear all form fields
     function clearEventForm() {
         document.getElementById('eventTitle').value = '';
+        document.getElementById('eventRecurrence').value = 'weekly';
         document.getElementById('eventDay').value = '0';
         document.getElementById('eventStartTime').value = '09:00';
         document.getElementById('eventEndTime').value = '10:00';
         document.getElementById('eventStart').value = '';
         document.getElementById('eventEnd').value = '';
-        document.getElementById('eventRecurrence').value = 'weekly';
         document.getElementById('eventRepeatCount').value = '2';
         updateInputVisibility();
     }
@@ -476,7 +305,6 @@ Added lots of comments to make it easier to find where everything is
         clearEventForm();
     });
 
-    // Close modal when clicking outside of it
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.style.display = 'none';
@@ -532,7 +360,7 @@ Added lots of comments to make it easier to find where everything is
             if (recurrence === 'repeat') {
                 const today = new Date();
                 const currentDayOfWeek = today.getDay();
-                const targetDayOfWeek = (dayIndex + 1) % 7; // Convert 0=Mon to JS 1=Mon
+                const targetDayOfWeek = (dayIndex + 1) % 7;
                 let daysUntil = targetDayOfWeek - currentDayOfWeek;
                 if (daysUntil <= 0) daysUntil += 7;
                 const targetDate = new Date(today);
@@ -541,25 +369,22 @@ Added lots of comments to make it easier to find where everything is
             }
         }
 
-        // Build request body
-        const requestBody = {
-            name: title,
-            day: dayIndex,
-            startTime: startTime,
-            endTime: endTime,
-            mandatory: false,
-            isRecurring: recurrence === 'weekly',
-            specificDate: specificDate,
-            repeatCount: recurrence === 'repeat' ? repeatCount : 0
-        };
-
         fetch("{% url 'createevent' %}", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": getCookie("csrftoken")
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify({
+                name: title,
+                day: dayIndex,
+                startTime: startTime,
+                endTime: endTime,
+                mandatory: false,
+                isRecurring: recurrence === 'weekly',
+                specificDate: specificDate,
+                repeatCount: recurrence === 'repeat' ? repeatCount : 0
+            })
         })
         .then(response => response.json())
         .then(data => {
@@ -574,8 +399,5 @@ Added lots of comments to make it easier to find where everything is
             alert("Failed to add event");
         });
     });
-
 </script>
-
-
 {% endblock %}

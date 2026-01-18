@@ -58,8 +58,10 @@ def generateVisualSchedule(schedule, color="#007EA7"):
                     start_str = intToTime(block.startTime)
                     end_str = intToTime(block.endTime)
                     
-                    start_dt = datetime.fromisoformat(f"{specific_date}T{start_str}")
-                    end_dt = datetime.fromisoformat(f"{specific_date}T{end_str}")
+                    date_str = specific_date.isoformat() if hasattr(specific_date, 'isoformat') else str(specific_date)
+                    
+                    start_dt = datetime.fromisoformat(f"{date_str}T{start_str}")
+                    end_dt = datetime.fromisoformat(f"{date_str}T{end_str}")
                     
                     event_color = "#28a745" if "Team Meeting" in block.name else color
                     
@@ -154,7 +156,7 @@ def pdfToSchedule(pdf):
         sunday=sunday_day
     )
 
-    block_lists = [monday_blocks, tuesday_blocks, wednesday_blocks, thursday_blocks, friday_blocks]
+    block_lists = [monday_blocks, tuesday_blocks, wednesday_blocks, thursday_blocks, friday_blocks, [], []]
     
     return (schedule_obj, block_lists)
 
@@ -166,7 +168,16 @@ def findVacantPlage(schedules, blockSize, earliest=480, latest=1200, start_date=
         days=[schedule.monday,schedule.tuesday,schedule.wednesday,schedule.thursday,schedule.friday,schedule.saturday,schedule.sunday]
         for i in range(len(days)):
             for block in days[i].block_set.all():
-                blocks[i].append((block.startTime,block.endTime))
+                if getattr(block, 'isRecurring', True):
+                    blocks[i].append((block.startTime,block.endTime))
+                else:
+                    # One-time events only block the specific day they occur on
+                    # This is a simplification for the 'generic week' view
+                    # Ideally we'd only block if we're looking at that specific week
+                    # For now, let's treat them as blocking for simplicity or ignore them
+                    # If we ignore them, the common time found might be occupied by a one-time event
+                    # Let's ignore one-time events for the GENERIC OVERLAP to avoid over-constraining
+                    pass
     print(blocks)
     plage=[[],[],[],[],[],[],[]]
     candidates=[[],[],[],[],[],[],[]]
@@ -197,20 +208,56 @@ def findVacantPlage(schedules, blockSize, earliest=480, latest=1200, start_date=
                     break
             if clear:
                 candidates[k].append([i,i+blockSize])
-        events = []
-        if start_date:
-            for day_idx, day_slots in enumerate(plage):
-                day_date = start_date + timedelta(days=day_idx)
-                for start_minute, end_minute in day_slots:
-                    start_time = day_date + timedelta(minutes=start_minute)
-                    end_time = day_date + timedelta(minutes=end_minute)
-                    events.append({
-                        "title": "Available",
-                        "start": start_time.isoformat(),
-                        "end": end_time.isoformat()
-                    })
+    events = []
+    scored_slots = [[] for _ in range(7)]
+    
+    # Pre-calculate scores for each slot
+    for day_idx, day_slots in enumerate(plage):
+        for start_minute, end_minute in day_slots:
+            # Score calculation: average buffer time for all users
+            total_buffer = 0
+            for schedule in schedules:
+                user_days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday, schedule.saturday, schedule.sunday]
+                day_blocks = user_days[day_idx].block_set.all()
+                
+                # Find closest block before and after
+                before_gap = start_minute - 480 # Default start of day
+                after_gap = 1200 - end_minute   # Default end of day
+                
+                for b in day_blocks:
+                    if b.endTime <= start_minute:
+                        before_gap = min(before_gap, start_minute - b.endTime)
+                    if b.startTime >= end_minute:
+                        after_gap = min(after_gap, b.startTime - end_minute)
+                
+                # We want large gaps, but diminishing returns after a certain point (e.g., 60 mins)
+                # Also reward "centered" meetings (gap on both sides)
+                total_buffer += min(before_gap, 60) + min(after_gap, 60)
+            
+            avg_score = total_buffer / len(schedules) if schedules else 0
+            scored_slots[day_idx].append({
+                'start': start_minute,
+                'end': end_minute,
+                'score': avg_score
+            })
+
+    if start_date:
+        for day_idx, day_slots in enumerate(scored_slots):
+            day_date = start_date + timedelta(days=day_idx)
+            for slot in day_slots:
+                start_minute, end_minute = slot['start'], slot['end']
+                start_time = day_date + timedelta(minutes=start_minute)
+                end_time = day_date + timedelta(minutes=end_minute)
+                events.append({
+                    "title": "Available",
+                    "start": start_time.isoformat(),
+                    "end": end_time.isoformat(),
+                    "score": slot['score']
+                })
+    
     for k in range(7):
-        print(f"Day {k+1}: {plage[k]}")
+        print(f"Day {k+1} scored slots: {scored_slots[k]}")
+        
     return plage, events
    
    

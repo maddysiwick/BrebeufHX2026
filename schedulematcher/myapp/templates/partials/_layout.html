@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% comment %}
+Base layout for all authenticated pages with sidebar and calendar structure.
+Usage:
+{% extends "partials/_layout.html" %}
+{% block page_title %}Page Title{% endblock %}
+{% block header_icon %}<svg>...</svg>{% endblock %}
+{% block header_buttons %}...{% endblock %}
+{% block calendar_content %}...{% endblock %}
+{% block modals %}...{% endblock %}
+{% block scripts %}...{% endblock %}
+{% endcomment %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@event-calendar/build@5.2.3/dist/event-calendar.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@event-calendar/build@5.2.3/dist/event-calendar.min.js"></script>
+ 
+<main class="container-fluid" style="height: 100vh; padding: 15px;">
+    <div class="row h-100 no-gutters">
+        {% include "partials/_sidebar.html" %}
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-12" id="mainContent">
+            <div class="h-100 border rounded d-flex flex-column bg-white" style="overflow: hidden;">
+                <!-- Header Section -->
+                <div class="d-flex align-items-center px-4 border-bottom" style="height: 60px; min-height: 60px;">
+                    <h5 class="mb-0">
+                        {% block header_icon %}{% endblock %}
+                        {% block page_title %}{% endblock %}
+                    </h5>
+
+                    <div style="position: absolute; right: 15px;">
+                        {% block header_buttons %}{% endblock %}
+                        <button class="btn btn-outline-secondary p-2" id="userbutton">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Calendar Section -->
+                <div class="flex-grow-1 p-4" style="overflow: hidden;">
+                    {% block calendar_content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation Bar for mobile -->
+        <div class="fixed-bottom bg-white border-top d-md-none" style="height: 75px;">
+            <div class="d-flex align-items-center h-100 px-4" style="gap: 15px;">
+                <button class="btn btn-outline-secondary w-100" id="groupsButton">Groups</button>
+                <button class="btn btn-outline-secondary w-100" id="scheduleButton">Schedule</button>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- User Profile Modal (shared across all pages) -->
+    <div id="userProfileModal" style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+        ">
+        <div style="background: white; padding: 24px; border-radius: 12px; width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+            <div class="text-center mb-4">
+                <div style="width: 64px; height: 64px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <h5 class="mb-1">{{ user.username }}</h5>
+                <div class="text-muted small">{{ user.email|default:"No email set" }}</div>
+            </div>
+
+            <hr />
+
+            <button type="button" class="btn btn-danger btn-sm w-100 mb-3" id="clearScheduleBtn">Clear Schedule Data</button>
+
+            <div class="mb-3 p-3" style="background: #f8f9fa; border-radius: 8px;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-medium">Omnivox Schedule</span>
+                </div>
+                
+                <form method="POST" enctype="multipart/form-data" action="{% url 'uploadschedule' %}">
+                    {% csrf_token %}
+                    <input type="file" name="schedule_pdf" accept=".pdf" class="form-control form-control-sm mb-2" id="scheduleFileInput">
+                    <div class="d-flex" style="gap: 10px;">
+                        <button type="submit" class="btn btn-primary btn-sm flex-fill">
+                            {% if user.pdfFile %}Replace{% else %}Upload{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="d-flex" style="gap: 10px;">
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm flex-fill">Logout</a>
+                <button class="btn btn-secondary btn-sm flex-fill" id="closeUserProfile">Close</button>
+            </div>
+        </div>
+    </div>
+
+    {% block modals %}{% endblock %}
+
+</main>
+
+
+<script>
+    // Mobile View Setup (shared across all pages)
+    const urlParams = new URLSearchParams(window.location.search);
+    let MobileViewState = urlParams.get('page') || "schedule";
+
+    const groupsSidebar = document.getElementById("groupsSidebar");
+    const mainContent = document.getElementById("mainContent");
+
+    const groupsButton = document.getElementById("groupsButton");
+    const scheduleButton = document.getElementById("scheduleButton");
+    
+    function isMobile() {
+        return window.innerWidth < 768;
+    }
+
+    function setMobileView() {
+        if (isMobile()) {
+            mainContent.style.height = "calc(100% - 75px)";
+            groupsSidebar.style.height = "calc(100% - 75px)";
+        } else {
+            mainContent.style.height = "100%";
+            groupsSidebar.style.height = "100%";
+        }
+    }
+
+    function updateURL(page) {
+        const url = new URL(window.location);
+        url.searchParams.set('page', page);
+        history.replaceState({}, '', url);
+    }
+
+    function showGroups() {
+        if (!isMobile()) return;
+        MobileViewState = "groups";
+        updateURL("groups");
+        setMobileView();
+        
+        groupsSidebar.classList.remove('d-none');
+        mainContent.classList.add('d-none');
+        groupsSidebar.classList.add('col-12');
+        groupsSidebar.classList.remove('col-3');
+        groupsButton.classList.add('active');
+        scheduleButton.classList.remove('active');
+    }
+
+    function showSchedule() {
+        if (!isMobile()) return;
+        MobileViewState = "schedule";
+        updateURL("schedule");
+        setMobileView();
+
+        groupsSidebar.classList.add('d-none');
+        mainContent.classList.remove('d-none');
+        groupsSidebar.classList.add('col-3');
+        groupsSidebar.classList.remove('col-12');
+        groupsButton.classList.remove('active');
+        scheduleButton.classList.add('active');
+    }
+
+    function HandleView() {
+        setMobileView();
+        
+        if (!isMobile()) {
+            groupsSidebar.classList.remove('d-none');
+            mainContent.classList.remove('d-none');
+            groupsSidebar.classList.add('col-3');
+            groupsSidebar.classList.remove('col-12');
+            groupsSidebar.classList.remove('bg-white');
+        } else {
+            groupsSidebar.classList.add('bg-white');
+            if (MobileViewState == "groups") {
+                showGroups();
+            } else {
+                showSchedule();
+            }
+        }
+    }
+    
+    groupsButton.addEventListener("click", showGroups);
+    scheduleButton.addEventListener("click", showSchedule);
+    window.addEventListener('resize', HandleView);
+    HandleView();
+
+    // CSRF helper (shared)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // User Profile Modal (shared)
+    const userButton = document.getElementById('userbutton');
+    const userModal = document.getElementById('userProfileModal');
+    
+    userButton.addEventListener('click', () => {
+        userModal.style.display = 'flex';
+    });
+    
+    document.getElementById('closeUserProfile').addEventListener('click', () => {
+        userModal.style.display = 'none';
+    });
+    
+    userModal.addEventListener('click', (e) => {
+        if (e.target === userModal) {
+            userModal.style.display = 'none';
+        }
+    });
+    
+    // Clear schedule button
+    const clearBtn = document.getElementById('clearScheduleBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear your schedule? This will remove all events.')) {
+                fetch("{% url 'clearschedule' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken")
+                    }
+                })
+                .then(() => {
+                    window.location.reload();
+                });
+            }
+        });
+    }
+</script>
+
+{% block scripts %}{% endblock %}
+
+{% endblock %}
+

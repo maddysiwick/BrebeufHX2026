@@ -61,7 +61,35 @@
 <!-- Popovers -->
 <div id="groupSettingsPopover" style="position: absolute; display: none; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000;">
     <p class="mb-0" style="cursor: pointer;" id="renameGroup">Rename</p>
-    <p class="mb-0 mt-2" style="color: red;" style="cursor: pointer;" id="leaveGroup">Leave</p>
+    <p class="mb-0 mt-2" style="cursor: pointer;" id="addMemberOption">Add Member</p>
+    <p class="mb-0 mt-2" style="color: red; cursor: pointer;" id="leaveGroup">Leave</p>
+</div>
+
+<!-- Add Member Modal -->
+<div id="addMemberModal" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    ">
+    <div style="background: white; padding: 20px; border-radius: 8px; width: 320px;">
+        <h5>Add Member</h5>
+        <p class="text-muted" style="font-size: 13px;">Invite a user to join this group.</p>
+
+        <label class="mt-2">Username</label>
+        <input id="memberUsername" class="form-control mb-3" type="text" placeholder="Enter username">
+        
+        <div id="addMemberError" class="alert alert-danger mb-3" style="display: none;"></div>
+        <div id="addMemberSuccess" class="alert alert-success mb-3" style="display: none;"></div>
+
+        <div class="d-flex justify-content-end" style="gap: 5px;">
+            <button class="btn btn-secondary btn-sm" id="closeAddMemberModal">Cancel</button>
+            <button class="btn btn-primary btn-sm" id="sendInviteBtn">Send Invite</button>
+        </div>
+    </div>
 </div>
 
 
@@ -221,6 +249,13 @@
             e.stopPropagation();
             leaveGroup(CurrentContextGroupId);
         });
+
+        document.getElementById("addMemberOption").addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            popover.style.display = 'none';
+            openAddMemberModal(CurrentContextGroupId);
+        });
     
         buttons.forEach(button => {
             button.addEventListener('click', function(e) {
@@ -254,5 +289,79 @@
             });
         });
     }
+
+    // Add Member Modal Logic
+    let addMemberTargetGroupId = null;
+    const addMemberModal = document.getElementById('addMemberModal');
+    const closeAddMemberModalBtn = document.getElementById('closeAddMemberModal');
+    const sendInviteBtn = document.getElementById('sendInviteBtn');
+    const memberUsernameInput = document.getElementById('memberUsername');
+    const addMemberError = document.getElementById('addMemberError');
+    const addMemberSuccess = document.getElementById('addMemberSuccess');
+
+    function openAddMemberModal(groupId) {
+        addMemberTargetGroupId = groupId;
+        addMemberModal.style.display = 'flex';
+        addMemberError.style.display = 'none';
+        addMemberSuccess.style.display = 'none';
+        memberUsernameInput.value = '';
+    }
+
+    closeAddMemberModalBtn.addEventListener('click', () => {
+        addMemberModal.style.display = 'none';
+    });
+
+    addMemberModal.addEventListener('click', (e) => {
+        if (e.target === addMemberModal) {
+            addMemberModal.style.display = 'none';
+        }
+    });
+
+    sendInviteBtn.addEventListener('click', () => {
+        const username = memberUsernameInput.value.trim();
+        
+        if (!username) {
+            addMemberError.textContent = 'Please enter a username';
+            addMemberError.style.display = 'block';
+            addMemberSuccess.style.display = 'none';
+            return;
+        }
+
+        sendInviteBtn.disabled = true;
+        sendInviteBtn.textContent = 'Sending...';
+
+        fetch(`/add-member/${addMemberTargetGroupId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ username: username })
+        })
+        .then(response => response.json())
+        .then(data => {
+            sendInviteBtn.disabled = false;
+            sendInviteBtn.textContent = 'Send Invite';
+
+            if (data.success) {
+                addMemberSuccess.textContent = `Invite sent to ${username}!`;
+                addMemberSuccess.style.display = 'block';
+                addMemberError.style.display = 'none';
+                memberUsernameInput.value = '';
+            } else {
+                addMemberError.textContent = data.error || 'Failed to send invite';
+                addMemberError.style.display = 'block';
+                addMemberSuccess.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            sendInviteBtn.disabled = false;
+            sendInviteBtn.textContent = 'Send Invite';
+            addMemberError.textContent = 'Failed to send invite';
+            addMemberError.style.display = 'block';
+            addMemberSuccess.style.display = 'none';
+        });
+    });
 
 </script>

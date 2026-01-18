@@ -53,7 +53,7 @@ def home(request):
     
     if request.user.is_authenticated and request.user.schedule:
         schedule = request.user.schedule
-        days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday]
+        days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday, schedule.saturday, schedule.sunday]
         block_lists = [list(day.block_set.all()) for day in days]
         events = generateVisualSchedule(block_lists)
 
@@ -113,7 +113,7 @@ def groupDetail(request, id):
     events = []
     if request.user.schedule:
         schedule = request.user.schedule
-        days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday]
+        days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday, schedule.saturday, schedule.sunday]
         block_lists = [list(day.block_set.all()) for day in days]
         events = generateVisualSchedule(block_lists)
 
@@ -133,7 +133,7 @@ def groupDetail(request, id):
         ColorMapping[user.username] = user_color
         if user.schedule:
             schedule = user.schedule
-            days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday]
+            days = [schedule.monday, schedule.tuesday, schedule.wednesday, schedule.thursday, schedule.friday, schedule.saturday, schedule.sunday]
             block_lists = [list(day.block_set.all()) for day in days]
             member_events = generateVisualSchedule(block_lists, color=user_color)
             all_events.extend(member_events)
@@ -353,28 +353,36 @@ def findCommonTime(request, team_id):
     if not schedules:
         return JsonResponse({"error": "No schedules found for team members"})
     
-    vacant_slots = findVacantPlage(schedules, duration)
+    vacant_slots, scored_events = findVacantPlage(schedules, duration, start_date=datetime(2026, 1, 5))
     
-    start_date = datetime(2026, 1, 5)
     day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     
     events = []
-    for day_index, day_slots in enumerate(vacant_slots):
-        day_date = start_date + timedelta(days=day_index)
-        for slot in day_slots:
-            start_minutes, end_minutes = slot
-            start_dt = day_date.replace(hour=start_minutes // 60, minute=start_minutes % 60)
-            end_dt = day_date.replace(hour=end_minutes // 60, minute=end_minutes % 60)
-            events.append({
-                'title': 'Available',
-                'start': start_dt.isoformat(),
-                'end': end_dt.isoformat(),
-                'color': '#28a745',
-                'day': day_index,
-                'dayName': day_names[day_index],
-                'startTime': start_minutes,
-                'endTime': end_minutes
-            })
+    max_score = -1
+    best_slot_idx = -1
+
+    for i, slot in enumerate(scored_events):
+        if slot['score'] > max_score:
+            max_score = slot['score']
+            best_slot_idx = i
+
+    for i, slot in enumerate(scored_events):
+        start_dt = datetime.fromisoformat(slot['start'])
+        end_dt = datetime.fromisoformat(slot['end'])
+        day_index = (start_dt.weekday()) % 7 # 0 is Monday
+        
+        events.append({
+            'title': 'Available',
+            'start': slot['start'],
+            'end': slot['end'],
+            'color': '#28a745',
+            'day': day_index,
+            'dayName': day_names[day_index],
+            'startTime': (start_dt.hour * 60 + start_dt.minute),
+            'endTime': (end_dt.hour * 60 + end_dt.minute),
+            'score': slot['score'],
+            'isRecommended': (i == best_slot_idx and slot['score'] > 0)
+        })
     
     return JsonResponse({"success": True, "events": events})
 
@@ -394,58 +402,6 @@ def dummy(request):
     results=findVacantPlage(schedules,120)
     return render (request,"dummy.html",{"vacantPlages":results})
 
-#im sorry for the unholy number of loops
-#it's fine it won't grow nearly to the size needed to become slow
-def findVacantPlage(schedules, blockSize, earliest=480, latest=1200):
-    blocks=[[],[],[],[],[],[],[]]
-    for schedule in schedules:
-        days=[schedule.monday,schedule.tuesday,schedule.wednesday,schedule.thursday,schedule.friday,schedule.saturday,schedule.sunday]
-        for i in range(len(days)):
-            for block in days[i].block_set.all():
-                blocks[i].append((block.startTime,block.endTime))
-    plage=findScheduleOverlap(blockSize,blocks)
-    if plage==[[],[],[],[],[],[],[]]:
-        blocks=[[],[],[],[],[],[],[]]
-        for schedule in schedules:
-            days=[schedule.monday,schedule.tuesday,schedule.wednesday,schedule.thursday,schedule.friday,schedule.saturday,schedule.sunday]
-            for i in range(len(days)):
-                for block in days[i].block_set.all():
-                    if block.mandatory:
-                        blocks[i].append((block.startTime,block.endTime))
-        plage=findScheduleOverlap(blockSize,blocks)
-    return plage
-            
-def findScheduleOverlap(blockSize,blocks, earliest=480, latest=1200):
-    plage=[[],[],[],[],[],[],[]]
-    candidates=[[],[],[],[],[],[],[]]
-
-    for i in range(earliest,latest,15):
-        for k in range(7):
-            toRemove=[]
-            for pair in candidates[k]:
-                if pair[0]==pair[1]:
-                    toRemove.append(pair)
-            for pair in toRemove:
-                plage[k].append((pair[0]-blockSize,pair[1]))
-                candidates[k].remove(pair)
-            for l in range(len(candidates[k])):
-                candidates[k][l][0]+=15
-            toRemove=[]
-            for candidate in candidates[k]:
-                for block in blocks[k]:
-                    if block[0]<candidate[0]<block[1]:
-                        toRemove.append(candidate)
-                        break
-            for item in toRemove:
-                candidates[k].remove(item)
-            clear=True
-            for block in blocks[k]:
-                if block[0]<i<block[1]:
-                    clear=False
-                    break
-            if clear:
-                candidates[k].append([i,i+blockSize])
-    return plage
 
 def checkTeamRequests(request):
     requests= request.user.request_set.all()
@@ -496,3 +452,103 @@ def toggle_mandatory(request, block_id):
 def logout_view(request):
     logout(request)
     return render(request,"welcomepage.html")
+
+
+def uploadSchedule(request):
+    if request.method != "POST":
+        return redirect("home")
+    
+    if not request.user.is_authenticated:
+        return redirect("welcomepage")
+    
+    if 'schedule_pdf' not in request.FILES:
+        messages.error(request, "No file uploaded")
+        return redirect("home")
+    
+    pdf_file = request.FILES['schedule_pdf']
+    
+    if request.user.pdfFile:
+        request.user.pdfFile.delete()
+    
+    try:
+        if request.user.schedule:
+            schedule = request.user.schedule
+            days = [schedule.monday, schedule.tuesday, schedule.wednesday, 
+                    schedule.thursday, schedule.friday, schedule.saturday, schedule.sunday]
+            for day in days:
+                day.block_set.all().delete()
+        
+        schedule_obj, block_lists = pdfToSchedule(pdf_file)
+        request.user.schedule = schedule_obj
+        request.user.save()
+        
+        messages.success(request, "Schedule uploaded successfully!")
+    except Exception as e:
+        print(f"Error parsing schedule: {str(e)}")
+        messages.error(request, f"Error parsing schedule: {str(e)}")
+    
+    return redirect("home")
+
+
+def clearSchedule(request):
+    if request.method != "POST":
+        return redirect("home")
+    
+    if not request.user.is_authenticated:
+        return redirect("welcomepage")
+    
+    if request.user.pdfFile:
+        request.user.pdfFile.delete()
+        request.user.pdfFile = None
+        request.user.save()
+    
+    if request.user.schedule:
+        schedule = request.user.schedule
+        days = [schedule.monday, schedule.tuesday, schedule.wednesday, 
+                schedule.thursday, schedule.friday, schedule.saturday, schedule.sunday]
+        for day in days:
+            day.block_set.all().delete()
+    
+    messages.success(request, "Schedule cleared!")
+    return redirect("home")
+
+
+def addMember(request, team_id):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "POST required"})
+    
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Not authenticated"})
+    
+    try:
+        team = Team.objects.get(id=team_id)
+    except Team.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Team not found"})
+    
+    if request.user not in team.members.all():
+        return JsonResponse({"success": False, "error": "You are not a member of this team"})
+    
+    data = asJSON(request)
+    username = data.get("username", "")
+    
+    if not username:
+        return JsonResponse({"success": False, "error": "No username provided"})
+    
+    try:
+        receptor = User.objects.get(username=username)
+        
+        if receptor in team.members.all():
+            return JsonResponse({"success": False, "error": "User is already a member"})
+        
+        existing = TeamRequest.objects.filter(sender=team, receptor=receptor).first()
+        if existing:
+            return JsonResponse({"success": False, "error": "Invite already sent"})
+        
+        TeamRequest.objects.create(
+            message=f"{request.user.username} invited you to join {team.name}",
+            sender=team,
+            receptor=receptor
+        )
+        return JsonResponse({"success": True})
+    except User.DoesNotExist:
+        return JsonResponse({"success": False, "error": "User not found"})

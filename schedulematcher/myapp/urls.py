@@ -23,4 +23,7 @@ urlpatterns = [
     path('leave-group/<int:team_id>/', views.leaveGroup, name='leave-group'),
     path('delete-event/<int:block_id>/', views.deleteCalendarEvent, name='delete-event'),
     path('update-event/<int:block_id>/', views.updateCalendarEvent, name='update-event'),
+    path('upload-schedule/', views.uploadSchedule, name='uploadschedule'),
+    path('clear-schedule/', views.clearSchedule, name='clearschedule'),
+    path('add-member/<int:team_id>/', views.addMember, name='add-member'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
